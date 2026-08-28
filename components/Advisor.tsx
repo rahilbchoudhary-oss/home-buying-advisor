@@ -6,6 +6,7 @@ import { questions, type Answers } from "@/lib/questions";
 type Product = {
   id:string; name:string; brand:string; capacity:number; star_rating:number; price:number;
   iseer:number; noise_db:number; smart:boolean; air_quality:boolean; warranty:string;
+  match_score:number;
 };
 
 const initial: Answers = {};
