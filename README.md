@@ -83,3 +83,4 @@ This keeps affiliate URLs out of the UI and gives you a first-party click ledger
 ## Important engineering note
 
 The scoring logic in `lib/scoring.ts` is an MVP business rule engine, not a substitute for HVAC engineering advice. Validate tonnage/load assumptions and all product specifications before publishing commercial recommendations.
+Deployment test
