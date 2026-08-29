@@ -3,6 +3,18 @@
 import { useMemo, useState } from "react";
 import { questions, type Answers } from "@/lib/questions";
 
+type Merchant = {
+  id: string;
+  name: string;
+  product_id: string;
+  price: number | null;
+  affiliate_url: string | null;
+  active: boolean;
+  last_checked_at?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 type Product = {
   id: string;
   name: string;
@@ -18,6 +30,7 @@ type Product = {
   model_number?: string | null;
   image_url?: string | null;
   product_details?: string | null;
+  merchants?: Merchant[];
   match_score: number;
 };
 
@@ -42,6 +55,12 @@ export default function Advisor() {
     setError("");
   }
 
+  /*
+   * Results screen
+   *
+   * IMPORTANT:
+   * Check this BEFORE accessing questions[step].
+   */
   if (step === questions.length) {
     return (
       <Results
@@ -82,6 +101,10 @@ export default function Advisor() {
         throw new Error(
           data.error || "Could not calculate recommendations"
         );
+      }
+
+      if (!Array.isArray(data.products)) {
+        throw new Error("Invalid recommendation response");
       }
 
       setProducts(data.products);
@@ -200,7 +223,9 @@ function Results({
   return (
     <div className="engine results">
 
-      {/* PERSONALIZED MATCH SUMMARY */}
+      {/* =====================================================
+          PERSONALIZED SHORTLIST
+          ===================================================== */}
 
       <div className="resultHero">
 
@@ -209,11 +234,13 @@ function Results({
         </div>
 
         <div className="topMatch">
+
           <span className="match">
             🥇 {top.match_score}% MATCH
           </span>
 
           <h2>{top.name}</h2>
+
         </div>
 
         <p>
@@ -225,12 +252,16 @@ function Results({
           <span>{top.capacity} Ton</span>
           <span>{top.star_rating} Star</span>
           <span>ISEER {top.iseer}</span>
-          <span>₹{top.price.toLocaleString("en-IN")}</span>
+          <span>
+            ₹{top.price.toLocaleString("en-IN")}
+          </span>
         </div>
 
       </div>
 
-      {/* PRODUCT RESULTS */}
+      {/* =====================================================
+          PRODUCT RESULTS
+          ===================================================== */}
 
       <div className="productList">
 
@@ -241,7 +272,9 @@ function Results({
             key={p.id}
           >
 
-            {/* PRODUCT IMAGE */}
+            {/* =================================================
+                PRODUCT IMAGE
+                ================================================= */}
 
             <div className="productImageBox">
 
@@ -259,11 +292,13 @@ function Results({
 
             </div>
 
-            {/* PRODUCT INFORMATION */}
+            {/* =================================================
+                PRODUCT INFORMATION
+                ================================================= */}
 
             <div className="productInfo">
 
-              {/* RANK + SCORE ROW */}
+              {/* RANK + MATCH SCORE */}
 
               <div className="productTopRow">
 
@@ -289,7 +324,7 @@ function Results({
 
               </div>
 
-              {/* PRODUCT NAME + SCORE */}
+              {/* PRODUCT NAME */}
 
               <div className="productTitleRow">
 
@@ -302,30 +337,45 @@ function Results({
               {/* PRODUCT SPECIFICATIONS */}
 
               <div className="tags">
-  <span>{p.capacity} Ton</span>
-  <span>{p.star_rating} Star</span>
-  <span>ISEER {p.iseer}</span>
-  <span>{p.noise_db} dB</span>
-  <span>{p.warranty}</span>
-</div>
 
-{p.product_details && (
-  <div className="productDescription">
-    <h4>Description</h4>
+                <span>
+                  {p.capacity} Ton
+                </span>
 
-    <ul>
-      {p.product_details
-        .split(/\s*(?:\d+[\.\)]|•)\s*/)
-        .filter(Boolean)
-        .slice(0, 3)
-        .map((point, index) => (
-          <li key={index}>{point.trim()}</li>
-        ))}
-    </ul>
-  </div>
-)}
+                <span>
+                  {p.star_rating} Star
+                </span>
 
-<Retailers product={p} />
+                <span>
+                  ISEER {p.iseer}
+                </span>
+
+                <span>
+                  {p.noise_db} dB
+                </span>
+
+                <span>
+                  {p.warranty}
+                </span>
+
+              </div>
+
+              {/* =================================================
+                  DESCRIPTION FROM SUPABASE
+                  Maximum 3 bullet points
+                  ================================================= */}
+
+              {p.product_details && (
+                <ProductDescription
+                  description={p.product_details}
+                />
+              )}
+
+              {/* =================================================
+                  MERCHANTS FROM SUPABASE
+                  ================================================= */}
+
+              <Retailers product={p} />
 
             </div>
 
@@ -335,7 +385,9 @@ function Results({
 
       </div>
 
-      {/* START AGAIN */}
+      {/* =====================================================
+          START AGAIN
+          ===================================================== */}
 
       <button
         className="button secondary restartButton"
@@ -354,17 +406,84 @@ function Results({
   );
 }
 
+/* =========================================================
+   PRODUCT DESCRIPTION
+   Reads description from Supabase and converts it into
+   maximum 3 bullet points.
+   ========================================================= */
+
+function ProductDescription({
+  description,
+}: {
+  description: string;
+}) {
+  const points = description
+    .split(/\r?\n|•|(?=\d+[\.\)])/)
+    .map((point) =>
+      point
+        .replace(/^\s*\d+[\.\)]\s*/, "")
+        .trim()
+    )
+    .filter(Boolean)
+    .slice(0, 3);
+
+  if (!points.length) {
+    return null;
+  }
+
+  return (
+    <div className="productDescription">
+
+      <h4>
+        Description
+      </h4>
+
+      <ul>
+        {points.map((point, index) => (
+          <li key={index}>
+            {point}
+          </li>
+        ))}
+      </ul>
+
+    </div>
+  );
+}
+
+/* =========================================================
+   RETAILERS
+   Merchants are controlled completely from Supabase.
+   No Amazon / Flipkart / Croma / Brand Store is hard-coded.
+   ========================================================= */
+
 function Retailers({
   product,
 }: {
   product: Product;
 }) {
-  const rows = [
-    ["Amazon", product.price],
-    ["Flipkart", Math.max(product.price - 1000, 0)],
-    ["Croma", product.price + 491],
-    ["Brand Store", product.price + 1000],
-  ];
+  const merchants = (product.merchants ?? [])
+    .filter(
+      (merchant) =>
+        merchant.active === true &&
+        merchant.name.trim() !== "" &&
+        merchant.price !== null
+    );
+
+  if (!merchants.length) {
+    return (
+      <div className="retailers">
+
+        <h4>
+          Where to buy
+        </h4>
+
+        <p className="muted">
+          No active offers available right now.
+        </p>
+
+      </div>
+    );
+  }
 
   return (
     <div className="retailers">
@@ -375,33 +494,41 @@ function Retailers({
 
       <div className="retailerGrid">
 
-        {rows.map(([name, price]) => (
+        {merchants.map((merchant) => (
 
           <div
             className="retailer"
-            key={name}
+            key={merchant.id}
           >
 
-            <b>
-              {name}
+            <b title={merchant.name}>
+              {merchant.name}
             </b>
 
             <span>
-              ₹{Number(price).toLocaleString("en-IN")}
+              ₹
+              {Number(merchant.price).toLocaleString("en-IN")}
             </span>
 
-            <a
-              className="button primary small"
-              href={`/api/click?product=${encodeURIComponent(
-                product.id
-              )}&merchant=${encodeURIComponent(
-                String(name)
-              )}`}
-              target="_blank"
-              rel="nofollow sponsored noopener"
-            >
-              Buy
-            </a>
+            {merchant.affiliate_url ? (
+              <a
+                className="button primary small"
+                href={`/api/click?merchant_id=${encodeURIComponent(
+                  merchant.id
+                )}`}
+                target="_blank"
+                rel="nofollow sponsored noopener"
+              >
+                Buy
+              </a>
+            ) : (
+              <button
+                className="button primary small"
+                disabled
+              >
+                Buy
+              </button>
+            )}
 
           </div>
 
