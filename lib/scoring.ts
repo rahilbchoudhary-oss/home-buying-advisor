@@ -39,28 +39,83 @@ function numeric(value: unknown): number | null {
     : null;
 }
 
+/*
+ * Climate adjustment.
+ *
+ * City is deliberately a secondary signal.
+ * We do not award arbitrary "city points".
+ *
+ * Instead, climate slightly changes the estimated
+ * cooling requirement.
+ */
+function climateAdjustment(city?: string) {
+  switch (city) {
+    case "Delhi NCR":
+      return 0.15;
+
+    case "Mumbai":
+    case "Chennai":
+    case "Kolkata":
+      return 0.10;
+
+    case "Bengaluru":
+      return 0;
+
+    default:
+      return 0.05;
+  }
+}
+
+/*
+ * Estimate the required AC capacity from:
+ *
+ * 1. Room size
+ * 2. Occupancy
+ * 3. Climate
+ *
+ * Room size remains the dominant signal.
+ */
 export function targetCapacity(answers: Answers) {
   let capacity = 1.2;
 
-  if (
-    answers.room === "300+ sq ft" ||
-    answers.room === "200–300 sq ft"
-  ) {
-    capacity = 2;
-  } else if (
-    answers.room === "150–200 sq ft" ||
-    answers.room === "100–150 sq ft"
-  ) {
+  // Base capacity from room size.
+  if (answers.room === "<100 sq ft") {
+    capacity = 1.2;
+  } else if (answers.room === "100–150 sq ft") {
     capacity = 1.5;
+  } else if (answers.room === "150–200 sq ft") {
+    capacity = 1.5;
+  } else if (answers.room === "200–300 sq ft") {
+    capacity = 2;
+  } else if (answers.room === "300+ sq ft") {
+    capacity = 2;
   }
 
-  // Occupancy is a secondary cooling-load signal.
-  if (answers.people === "3–4") capacity += 0.2;
-  if (answers.people === "5+") capacity += 0.4;
+  // Occupancy adjustment.
+  if (answers.people === "3–4") {
+    capacity += 0.10;
+  }
 
-  return Math.min(2.5, capacity);
+  if (answers.people === "5+") {
+    capacity += 0.20;
+  }
+
+  // Climate adjustment.
+  capacity += climateAdjustment(answers.city);
+
+  // AC products in our current catalogue are
+  // generally around 1.2–2 Ton, so don't let
+  // the calculated target become unrealistic.
+  return Math.min(2.5, Number(capacity.toFixed(2)));
 }
 
+/*
+ * Capacity contributes 30 points.
+ *
+ * Exact / very close matches score highest.
+ * Oversizing or undersizing progressively reduces
+ * the score.
+ */
 function capacityScore(
   productCapacity: number | null,
   target: number
@@ -69,15 +124,23 @@ function capacityScore(
 
   const difference = Math.abs(productCapacity - target);
 
-  if (difference === 0) return 30;
-  if (difference <= 0.25) return 26;
-  if (difference <= 0.5) return 20;
-  if (difference <= 0.75) return 12;
-  if (difference <= 1) return 5;
+  if (difference <= 0.10) return 30;
+  if (difference <= 0.25) return 27;
+  if (difference <= 0.40) return 23;
+  if (difference <= 0.60) return 17;
+  if (difference <= 0.80) return 10;
+  if (difference <= 1.00) return 4;
 
   return 0;
 }
 
+/*
+ * Budget contributes 20 points.
+ *
+ * Staying within budget is strongly preferred.
+ * Slightly exceeding the budget is allowed as a
+ * fallback, but receives a significant penalty.
+ */
 function budgetScore(
   price: number | null,
   budget: number
@@ -86,14 +149,22 @@ function budgetScore(
 
   const ratio = price / budget;
 
-  if (ratio <= 1) return 20;
-  if (ratio <= 1.05) return 15;
+  if (ratio <= 0.75) return 20;
+  if (ratio <= 0.90) return 19;
+  if (ratio <= 1.00) return 18;
+  if (ratio <= 1.05) return 14;
   if (ratio <= 1.15) return 8;
-  if (ratio <= 1.3) return 3;
+  if (ratio <= 1.30) return 3;
 
   return 0;
 }
 
+/*
+ * Energy efficiency contributes 15 points.
+ *
+ * ISEER gives us a continuous efficiency signal.
+ * Star rating captures the user's stated preference.
+ */
 function efficiencyScore(
   product: Product,
   answers: Answers,
@@ -104,7 +175,6 @@ function efficiencyScore(
 
   let score = 0;
 
-  // ISEER is the stronger continuous efficiency signal.
   if (iseer !== null) {
     if (iseer >= 5.5) score += 8;
     else if (iseer >= 5.0) score += 7;
@@ -113,7 +183,6 @@ function efficiencyScore(
     else score += 1;
   }
 
-  // Star rating reflects the user's stated preference.
   if (answers.star === "Must have 5 Star") {
     if (stars === 5) score += 5;
     else if (stars !== null && stars >= 4) score += 2;
@@ -123,16 +192,20 @@ function efficiencyScore(
   } else if (answers.star === "Either is fine") {
     if (stars === 5) score += 2;
   } else if (answers.star === "Lowest price first") {
-    // Purchase price is already handled by budgetScore.
-    score += stars === 5 ? 1 : 0;
+    // Price is already handled separately.
+    if (stars === 5) score += 1;
   }
 
-  // Heavy daily usage makes efficiency more important.
+  // Longer usage increases the importance
+  // of efficiency.
   score += usageWeight;
 
   return clamp(score, 0, 15);
 }
 
+/*
+ * User-selected priority contributes 15 points.
+ */
 function priorityScore(
   product: Product,
   answers: Answers,
@@ -159,7 +232,7 @@ function priorityScore(
 
       if (capacity >= target) return 15;
       if (capacity >= target - 0.25) return 10;
-      if (capacity >= target - 0.5) return 5;
+      if (capacity >= target - 0.50) return 5;
 
       return 0;
     }
@@ -184,8 +257,11 @@ function priorityScore(
       return product.smart === true ? 15 : 0;
 
     case "Low maintenance":
-      // We don't currently have reliable maintenance data.
-      // Do not invent a product-specific maintenance score.
+      /*
+       * We don't currently have a maintenance field.
+       * Therefore we intentionally don't invent a
+       * product-specific maintenance score.
+       */
       return 7.5;
 
     default:
@@ -193,6 +269,9 @@ function priorityScore(
   }
 }
 
+/*
+ * Occupancy contributes 10 points.
+ */
 function occupancyScore(
   productCapacity: number | null,
   answers: Answers
@@ -207,12 +286,15 @@ function occupancyScore(
         : 1.0;
 
   if (productCapacity >= minimumCapacity) return 10;
-  if (productCapacity >= minimumCapacity - 0.2) return 7;
-  if (productCapacity >= minimumCapacity - 0.5) return 4;
+  if (productCapacity >= minimumCapacity - 0.20) return 7;
+  if (productCapacity >= minimumCapacity - 0.50) return 4;
 
   return 0;
 }
 
+/*
+ * Noise contributes 5 points.
+ */
 function noiseScore(noise: number | null) {
   if (noise === null) return 0;
 
@@ -224,15 +306,29 @@ function noiseScore(noise: number | null) {
   return 0;
 }
 
+/*
+ * General feature fit contributes 5 points.
+ *
+ * These features should not dominate the decision
+ * unless the user explicitly selected them as a priority.
+ */
 function featureScore(product: Product) {
   let score = 0;
 
-  if (product.smart === true) score += 2.5;
-  if (product.air_quality === true) score += 2.5;
+  if (product.smart === true) {
+    score += 2.5;
+  }
+
+  if (product.air_quality === true) {
+    score += 2.5;
+  }
 
   return score;
 }
 
+/*
+ * Full explainable scoring breakdown.
+ */
 export function scoreProductBreakdown(
   product: Product,
   answers: Answers
@@ -305,6 +401,11 @@ export function scoreProductBreakdown(
   };
 }
 
+/*
+ * Public function used by the recommendation API.
+ *
+ * Keeps the existing API contract unchanged.
+ */
 export function scoreProduct(
   product: Product,
   answers: Answers
