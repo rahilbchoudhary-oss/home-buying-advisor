@@ -1,6 +1,11 @@
 import "./globals.css";
 import Link from "next/link";
 
+export const metadata = {
+  title: "Home Buying Advisor",
+  description: "Smarter Choices. A Better Home.",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
