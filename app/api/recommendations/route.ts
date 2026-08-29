@@ -19,9 +19,8 @@ export async function POST(req: Request) {
      * Get active AC products together with:
      *
      * 1. Product details
-     * 2. Merchants / affiliate offers
-     *
-     * Both are controlled from Supabase.
+     * 2. Product-specific offers
+     * 3. Merchant information for each offer
      */
     const { data, error } = await supabase
       .from("products")
@@ -34,16 +33,21 @@ export async function POST(req: Request) {
           created_at,
           updated_at
         ),
-        merchants (
+        product_offers (
           id,
-          name,
           product_id,
+          merchant_id,
           price,
           affiliate_url,
           active,
           last_checked_at,
           created_at,
-          updated_at
+          updated_at,
+          merchants (
+            id,
+            name,
+            active
+          )
         )
       `)
       .eq("category", "ac")
@@ -55,6 +59,8 @@ export async function POST(req: Request) {
 
     /*
      * Calculate recommendation score.
+     *
+     * Only active product offers are returned.
      */
     const products = (data ?? [])
       .map((p: any) => ({
@@ -63,11 +69,8 @@ export async function POST(req: Request) {
         match_score: scoreProduct(p, answers),
 
         /*
-         * Supabase may return product_details
-         * as an array because of the relationship.
-         *
-         * Convert it into the description string
-         * expected by Advisor.tsx.
+         * Convert product_details relationship into
+         * the description string expected by Advisor.tsx
          */
         product_details:
           Array.isArray(p.product_details)
@@ -75,12 +78,29 @@ export async function POST(req: Request) {
             : p.product_details?.description ?? null,
 
         /*
-         * Only active merchants should reach the UI.
+         * Convert product_offers into the merchant
+         * structure expected by the frontend.
+         *
+         * Each offer belongs to one specific product
+         * and one specific merchant.
          */
-        merchants: (p.merchants ?? []).filter(
-          (merchant: any) =>
-            merchant.active === true
-        ),
+        merchants: (p.product_offers ?? [])
+          .filter(
+            (offer: any) =>
+              offer.active === true &&
+              offer.merchants?.active === true
+          )
+          .map((offer: any) => ({
+            id: offer.merchant_id,
+            name: offer.merchants.name,
+            product_id: offer.product_id,
+            price: offer.price,
+            affiliate_url: offer.affiliate_url,
+            active: offer.active,
+            last_checked_at: offer.last_checked_at,
+            created_at: offer.created_at,
+            updated_at: offer.updated_at,
+          })),
       }))
       .sort(
         (a: any, b: any) =>
