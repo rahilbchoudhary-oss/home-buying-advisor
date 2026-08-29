@@ -312,7 +312,16 @@ function Results({
 {p.product_details && (
   <div className="productDescription">
     <h4>Description</h4>
-    <p>{p.product_details}</p>
+
+    <ul>
+      {p.product_details
+        .split(/\s*(?:\d+[\.\)]|•)\s*/)
+        .filter(Boolean)
+        .slice(0, 3)
+        .map((point, index) => (
+          <li key={index}>{point.trim()}</li>
+        ))}
+    </ul>
   </div>
 )}
 
