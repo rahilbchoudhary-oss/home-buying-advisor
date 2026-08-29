@@ -1183,3 +1183,616 @@ footer b{
     height:23px;
   }
 }
+
+/* =========================================================
+   FINAL RESULTS LAYOUT OVERRIDES
+   These rules are intentionally at the end so they override
+   the earlier product/result rules without changing JSX/JS.
+========================================================= */
+
+/* Wider, cleaner white results container */
+.engine:has(.results){
+  width:min(1420px,96vw);
+  padding:36px 38px 38px;
+  border-radius:28px;
+}
+
+/* Remove duplicate headings/hero */
+.results > h3,
+.results > .resultHero{
+  display:none;
+}
+
+.results{
+  width:100%;
+  margin:0;
+}
+
+.resultsTitle{
+  display:none;
+}
+
+/* Main product card:
+   image + details on top, score + explanation across bottom */
+.product{
+  position:relative;
+  display:grid;
+  grid-template-columns:minmax(440px,1.02fr) minmax(500px,1fr);
+  grid-template-rows:minmax(500px,1fr) 112px;
+  grid-template-areas:
+    "image info"
+    "score why";
+
+  width:100%;
+  min-height:650px;
+  gap:24px 38px;
+
+  padding:20px;
+  background:#fff;
+  border:1px solid #dfe5ee;
+  border-radius:24px;
+  overflow:hidden;
+}
+
+/* Product image stays aligned with the complete right-hand
+   information/retailer column */
+.productImageBox{
+  grid-area:image;
+  width:100%;
+  height:100%;
+  min-height:500px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:34px;
+  background:#f8fafc;
+  border:1px solid #edf1f6;
+  border-radius:18px;
+  overflow:hidden;
+}
+
+.productImage{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:440px;
+  object-fit:contain;
+  object-position:center;
+  margin:0;
+  border-radius:12px;
+}
+
+/* Right-hand product details */
+.productInfo{
+  grid-area:info;
+  min-width:0;
+  padding:8px 4px 0 0;
+}
+
+.productHeader{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+}
+
+.product h3{
+  margin:6px 0 12px;
+  font-size:30px;
+  line-height:1.16;
+  letter-spacing:-.9px;
+}
+
+.rank{
+  font-size:14px;
+  color:var(--primary);
+  font-weight:900;
+  text-transform:uppercase;
+}
+
+.tags{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.tags span{
+  background:#f2f4f7;
+  border-radius:999px;
+  padding:8px 11px;
+  font-size:13px;
+  color:#344054;
+  white-space:nowrap;
+}
+
+/* Retailers remain inside the right-hand column */
+.retailers{
+  border-top:1px solid var(--line);
+  margin-top:24px;
+  padding-top:17px;
+}
+
+.retailers h4{
+  margin:0 0 8px;
+  font-size:22px;
+}
+
+.retailer{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 140px 82px;
+  gap:12px;
+  align-items:center;
+
+  border-bottom:1px solid #edf0f4;
+  padding:13px 0;
+  font-size:16px;
+}
+
+.retailer:last-child{
+  border-bottom:0;
+}
+
+.retailer b{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.retailer span{
+  white-space:nowrap;
+  text-align:left;
+  font-size:16px;
+}
+
+.retailer a{
+  justify-self:end;
+  width:82px;
+}
+
+.retailer .button.primary{
+  display:inline-flex;
+  visibility:visible;
+  opacity:1;
+  pointer-events:auto;
+  color:#fff;
+  min-height:42px;
+}
+
+/* Bottom-left: "Your match score" + percentage */
+.score{
+  grid-area:score;
+
+  position:relative;
+  left:auto;
+  bottom:auto;
+
+  display:flex;
+  align-items:flex-end;
+
+  min-width:0;
+  min-height:112px;
+
+  margin:0;
+  padding:38px 20px 8px 28px;
+
+  border:0;
+  border-right:1px solid #dce4ef;
+
+  font-size:54px;
+  line-height:1;
+  font-weight:900;
+  color:var(--green);
+  white-space:nowrap;
+  z-index:2;
+}
+
+.score::before{
+  content:"Your match score";
+
+  position:absolute;
+  left:28px;
+  top:10px;
+
+  color:#17345f;
+  font-size:17px;
+  line-height:1.2;
+  font-weight:800;
+  white-space:nowrap;
+}
+
+.productScore{
+  display:none;
+}
+
+/* Bottom-right: light-blue "Why this is a great match" panel */
+.product::after{
+  content:"Why this is a great match\A\AMatches your room size, budget and efficiency needs. Excellent energy savings with 5-star rating and low noise.";
+
+  grid-area:why;
+
+  position:relative;
+  left:auto;
+  right:auto;
+  bottom:auto;
+
+  display:flex;
+  align-items:center;
+
+  min-height:112px;
+  margin:0;
+  padding:18px 24px 18px 76px;
+
+  white-space:pre-line;
+
+  background:linear-gradient(135deg,#eff7ff 0%,#f5faff 100%);
+  border:1px solid #e4efff;
+  border-radius:14px;
+
+  color:#475467;
+  font-size:16px;
+  line-height:1.45;
+}
+
+/* Green check circle in the why panel */
+.product::before{
+  content:"✓";
+
+  position:absolute;
+  left:calc(50% + 20px);
+  bottom:37px;
+
+  width:38px;
+  height:38px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border-radius:50%;
+  background:#d1fadf;
+  color:var(--green);
+
+  font-size:21px;
+  font-weight:900;
+  z-index:3;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media(max-width:1100px){
+
+  .engine:has(.results){
+    width:min(96vw,1000px);
+    padding:28px;
+  }
+
+  .product{
+    grid-template-columns:minmax(330px,.9fr) minmax(0,1.1fr);
+    grid-template-rows:minmax(430px,1fr) 105px;
+    gap:22px;
+  }
+
+  .productImageBox{
+    min-height:430px;
+  }
+
+  .productImage{
+    max-height:360px;
+  }
+
+  .product h3{
+    font-size:26px;
+  }
+
+  .retailer{
+    grid-template-columns:minmax(0,1fr) 110px 72px;
+  }
+
+  .retailer a{
+    width:72px;
+  }
+
+  .score{
+    font-size:48px;
+    padding-left:22px;
+  }
+
+  .score::before{
+    left:22px;
+    font-size:15px;
+  }
+
+  .product::after{
+    padding-left:66px;
+    font-size:14px;
+  }
+
+  .product::before{
+    left:calc(50% + 10px);
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media(max-width:800px){
+
+  .engine{
+    width:94%;
+    padding:16px;
+    border-radius:20px;
+  }
+
+  .engine:has(.results){
+    width:96%;
+    padding:12px;
+    border-radius:20px;
+  }
+
+  .product{
+    display:grid;
+    grid-template-columns:1fr;
+    grid-template-rows:auto auto auto;
+    grid-template-areas:
+      "image"
+      "info"
+      "score"
+      "why";
+
+    width:100%;
+    min-height:0;
+    gap:14px;
+    padding:12px;
+    border-radius:18px;
+  }
+
+  .productImageBox{
+    grid-area:image;
+    width:100%;
+    height:250px;
+    min-height:250px;
+    padding:18px;
+    border-radius:15px;
+  }
+
+  .productImage{
+    width:100%;
+    height:100%;
+    max-width:100%;
+    max-height:215px;
+    object-fit:contain;
+  }
+
+  .productInfo{
+    grid-area:info;
+    width:100%;
+    padding:0;
+  }
+
+  .productHeader{
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .product h3{
+    font-size:21px;
+    line-height:1.2;
+    letter-spacing:-.4px;
+    margin:5px 0 8px;
+  }
+
+  .rank{
+    font-size:11px;
+  }
+
+  .tags{
+    gap:6px;
+    margin-top:10px;
+  }
+
+  .tags span{
+    padding:6px 8px;
+    font-size:11px;
+  }
+
+  .retailers{
+    margin-top:17px;
+    padding-top:13px;
+  }
+
+  .retailers h4{
+    font-size:18px;
+    margin-bottom:4px;
+  }
+
+  .retailer{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 82px 66px;
+    gap:5px;
+    padding:10px 0;
+    font-size:13px;
+    min-height:48px;
+  }
+
+  .retailer b{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+
+  .retailer span{
+    font-size:12px;
+    white-space:nowrap;
+  }
+
+  .retailer a{
+    width:66px;
+    min-width:66px;
+    height:36px;
+    justify-self:end;
+  }
+
+  /* Affiliate buttons explicitly stay visible on mobile */
+  .retailer .button.primary{
+    display:inline-flex !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    pointer-events:auto !important;
+    color:#fff;
+    min-height:36px;
+    padding:7px 8px;
+    font-size:12px;
+    border-radius:10px;
+  }
+
+  .score{
+    grid-area:score;
+    position:relative;
+    left:auto;
+    bottom:auto;
+
+    display:flex;
+    align-items:flex-end;
+
+    min-height:94px;
+    padding:38px 0 8px 8px;
+
+    border:0;
+    border-top:1px solid #dce4ef;
+
+    font-size:38px;
+  }
+
+  .score::before{
+    left:8px;
+    top:13px;
+    font-size:15px;
+  }
+
+  .product::after{
+    grid-area:why;
+
+    position:relative;
+    left:auto;
+    right:auto;
+    bottom:auto;
+
+    min-height:94px;
+    margin:0;
+    padding:15px 12px 15px 50px;
+
+    border-radius:13px;
+    font-size:12px;
+    line-height:1.4;
+
+    content:"Why this is a great match\A\AMatches your room size, budget and efficiency needs.";
+  }
+
+  .product::before{
+    left:24px;
+    bottom:28px;
+    width:28px;
+    height:28px;
+    font-size:16px;
+  }
+
+  .disclaimer{
+    font-size:10px;
+    line-height:1.45;
+  }
+
+  footer .container{
+    display:block;
+  }
+
+  footer .container span{
+    display:block;
+    margin-top:8px;
+  }
+}
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media(max-width:420px){
+
+  .engine:has(.results){
+    width:97%;
+    padding:10px;
+  }
+
+  .product{
+    padding:10px;
+    gap:12px;
+  }
+
+  .productImageBox{
+    height:210px;
+    min-height:210px;
+    padding:14px;
+  }
+
+  .productImage{
+    max-height:180px;
+  }
+
+  .product h3{
+    font-size:19px;
+  }
+
+  .retailer{
+    grid-template-columns:minmax(0,1fr) 76px 58px;
+    gap:4px;
+  }
+
+  .retailer a,
+  .retailer .button.primary{
+    width:58px;
+    min-width:58px;
+  }
+
+  .retailer .button.primary{
+    font-size:11px;
+    padding-left:5px;
+    padding-right:5px;
+  }
+
+  .retailer span{
+    font-size:11px;
+  }
+
+  .score{
+    min-height:88px;
+    padding-top:36px;
+    font-size:32px;
+  }
+
+  .score::before{
+    left:8px;
+    top:12px;
+    font-size:14px;
+  }
+
+  .product::after{
+    min-height:88px;
+    padding:13px 10px 13px 44px;
+    font-size:10px;
+  }
+
+  .product::before{
+    left:20px;
+    bottom:26px;
+    width:24px;
+    height:24px;
+    font-size:14px;
+  }
+}
