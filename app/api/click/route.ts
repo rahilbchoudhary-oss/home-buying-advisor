@@ -21,9 +21,6 @@ export async function GET(req: Request) {
      * Find the offer for this exact:
      *
      * product + merchant
-     *
-     * The affiliate URL belongs to product_offers,
-     * not the merchants table.
      */
     const { data: offer, error } = await supabase
       .from("product_offers")
@@ -47,8 +44,7 @@ export async function GET(req: Request) {
     if (
       error ||
       !offer ||
-      !offer.affiliate_url ||
-      !offer.merchants?.active
+      !offer.affiliate_url
     ) {
       return NextResponse.json(
         { error: "Offer unavailable" },
@@ -57,19 +53,27 @@ export async function GET(req: Request) {
     }
 
     /*
+     * Supabase can return the nested merchant
+     * relationship as an array.
+     */
+    const merchantName = Array.isArray(offer.merchants)
+      ? offer.merchants[0]?.name ?? ""
+      : offer.merchants?.name ?? "";
+
+    /*
      * Record the affiliate click.
      */
     await supabase
       .from("affiliate_clicks")
       .insert({
         offer_id: offer.id,
-        merchant: offer.merchants.name,
+        merchant: merchantName,
         product_id: productId,
         referrer: req.headers.get("referer"),
       });
 
     /*
-     * Redirect user to the product-specific
+     * Redirect to the product-specific
      * affiliate URL.
      */
     return NextResponse.redirect(
