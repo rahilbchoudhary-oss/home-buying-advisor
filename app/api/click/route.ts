@@ -17,76 +17,62 @@ export async function GET(req: Request) {
   try {
     const supabase = supabaseAdmin();
 
-    /*
-     * Find the offer for this exact:
-     *
-     * product + merchant
-     */
-    const { data: offer, error } = await supabase
+    // Find the exact offer for this product + merchant
+    const { data: offer, error: offerError } = await supabase
       .from("product_offers")
-      .select(`
-        id,
-        product_id,
-        merchant_id,
-        affiliate_url,
-        active,
-        merchants (
-          id,
-          name,
-          active
-        )
-      `)
+      .select("id, product_id, merchant_id, affiliate_url, active")
       .eq("product_id", productId)
       .eq("merchant_id", merchantId)
       .eq("active", true)
       .single();
 
-    if (
-      error ||
-      !offer ||
-      !offer.affiliate_url
-    ) {
+    if (offerError || !offer || !offer.affiliate_url) {
       return NextResponse.json(
         { error: "Offer unavailable" },
         { status: 404 }
       );
     }
 
-    /*
-     * Supabase can return the nested merchant
-     * relationship as an array.
-     */
-    const merchantName = Array.isArray(offer.merchants)
-      ? offer.merchants[0]?.name ?? ""
-      : offer.merchants?.name ?? "";
+    // Get merchant name separately
+    const { data: merchant, error: merchantError } = await supabase
+      .from("merchants")
+      .select("id, name")
+      .eq("id", merchantId)
+      .eq("active", true)
+      .single();
 
-    /*
-     * Record the affiliate click.
-     */
-    await supabase
+    if (merchantError || !merchant) {
+      return NextResponse.json(
+        { error: "Merchant unavailable" },
+        { status: 404 }
+      );
+    }
+
+    // Record affiliate click
+    const { error: clickError } = await supabase
       .from("affiliate_clicks")
       .insert({
         offer_id: offer.id,
-        merchant: merchantName,
+        merchant: merchant.name,
         product_id: productId,
         referrer: req.headers.get("referer"),
       });
 
-    /*
-     * Redirect to the product-specific
-     * affiliate URL.
-     */
+    if (clickError) {
+      console.error("Affiliate click tracking error:", clickError);
+      // Do not block the user's purchase because tracking failed.
+    }
+
+    // Redirect to the product-specific affiliate URL
     return NextResponse.redirect(
       offer.affiliate_url,
       302
     );
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.error("Affiliate redirect error:", error);
 
     return NextResponse.json(
-      {
-        error: "Affiliate redirect unavailable",
-      },
+      { error: "Affiliate redirect unavailable" },
       { status: 500 }
     );
   }
