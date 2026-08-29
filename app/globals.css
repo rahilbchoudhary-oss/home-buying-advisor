@@ -1819,3 +1819,400 @@ a{
   }
 }
 
+/* =========================================================
+   FINAL PRECISION FIXES — v7
+========================================================= */
+
+/* ---------------------------------------------------------
+   1. Product image: reduce by ~15%
+   --------------------------------------------------------- */
+.productImage{
+  max-height:350px;
+  max-width:85%;
+  margin:auto;
+}
+
+.productImageBox{
+  padding:28px;
+}
+
+/* ---------------------------------------------------------
+   2. Personalized shortlist:
+      make the heading and summary ONE complete panel.
+      No clipping / merging with the outer results card.
+   --------------------------------------------------------- */
+.results > h3{
+  position:relative;
+  z-index:2;
+
+  width:80%;
+  margin:0 auto;
+
+  padding:20px 30px 8px;
+
+  text-align:center;
+
+  background:linear-gradient(135deg,#f4f8ff 0%,#fbfdff 100%);
+
+  border:1px solid #dce9ff;
+  border-bottom:0;
+
+  border-radius:18px 18px 0 0;
+
+  overflow:visible;
+
+  font-size:28px;
+  line-height:1.2;
+}
+
+.results > .resultHero{
+  position:relative;
+  z-index:1;
+
+  width:80%;
+  margin:0 auto 24px;
+
+  padding:4px 30px 22px;
+
+  text-align:center;
+
+  background:linear-gradient(135deg,#f4f8ff 0%,#fbfdff 100%);
+
+  border:1px solid #dce9ff;
+  border-top:0;
+
+  border-radius:0 0 18px 18px;
+
+  box-shadow:0 6px 20px rgba(16,24,40,.035);
+}
+
+/* A small divider visually separates the heading from summary
+   while keeping them in the same light panel. */
+.results > .resultHero::before{
+  content:"";
+
+  display:block;
+
+  width:54px;
+  height:2px;
+
+  margin:0 auto 12px;
+
+  background:#c9dafc;
+  border-radius:99px;
+}
+
+/* ---------------------------------------------------------
+   3. Correct score alignment:
+      Rank = BEST MATCH / ALTERNATIVE / BUDGET...
+      Product name = Breeze X...
+      Score = 98%
+      Score label = Your match score
+
+      Score sits on the SAME LINE as the product name,
+      while its label sits above the percentage.
+   --------------------------------------------------------- */
+.productInfo{
+  position:relative;
+  padding-right:8px;
+}
+
+.productHeader{
+  position:relative;
+
+  display:block;
+
+  min-height:64px;
+
+  /* enough room so the score never overlaps the name */
+  padding-right:125px;
+}
+
+.productHeader .rank{
+  margin:0 0 5px;
+  font-size:11px;
+  line-height:1;
+}
+
+/* Product name and score percentage share the title row */
+.productHeader h3{
+  display:block;
+
+  margin:0;
+
+  max-width:100%;
+
+  font-size:25px;
+  line-height:1.15;
+}
+
+/* The existing .score is moved into the header visually */
+.productHeader .score,
+.product .productHeader + .score{
+  position:absolute;
+
+  top:22px;
+  right:0;
+
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+
+  margin:0;
+  padding:0;
+
+  min-width:92px;
+
+  border:0;
+
+  color:var(--green);
+
+  font-size:29px;
+  line-height:1;
+  font-weight:900;
+
+  white-space:nowrap;
+
+  z-index:4;
+}
+
+.productHeader .score::before,
+.product .productHeader + .score::before{
+  content:"Your match score";
+
+  position:static;
+
+  display:block;
+
+  margin-bottom:3px;
+
+  color:#475467;
+
+  font-size:13px;
+  line-height:1.1;
+  font-weight:750;
+
+  white-space:nowrap;
+}
+
+/*
+   Compatibility rule for the current JSX where .score is a
+   sibling of .productInfo rather than inside .productHeader.
+*/
+.product > .score{
+  position:absolute;
+
+  top:42px;
+  right:calc(22px + 0px);
+
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+
+  min-width:92px;
+
+  margin:0;
+  padding:0;
+
+  border:0;
+
+  color:var(--green);
+
+  font-size:29px;
+  line-height:1;
+  font-weight:900;
+
+  z-index:5;
+}
+
+.product > .score::before{
+  content:"Your match score";
+
+  position:static;
+
+  display:block;
+
+  margin-bottom:3px;
+
+  color:#475467;
+
+  font-size:13px;
+  line-height:1.1;
+  font-weight:750;
+
+  white-space:nowrap;
+}
+
+/* ---------------------------------------------------------
+   4. Product details → right text / retailers:
+      introduce comfortable breathing room.
+   --------------------------------------------------------- */
+.product{
+  grid-template-columns:minmax(360px,.88fr) minmax(460px,1.12fr);
+  gap:28px 46px;
+  padding:24px;
+}
+
+.productInfo{
+  padding:6px 12px 0 8px;
+}
+
+.retailers{
+  margin-top:18px;
+  padding-top:18px;
+}
+
+.productInfo .retailers{
+  padding-right:8px;
+}
+
+/* Desktop retailer columns get breathing room */
+@media(min-width:701px){
+
+  .productInfo .retailers{
+    column-gap:20px;
+  }
+
+  .productInfo .retailers .retailer{
+    padding-left:2px;
+    padding-right:2px;
+  }
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+@media(max-width:700px){
+
+  .results > h3{
+    width:100%;
+
+    padding:16px 12px 6px;
+
+    font-size:21px;
+
+    border-radius:16px 16px 0 0;
+  }
+
+  .results > .resultHero{
+    width:100%;
+
+    margin:0 auto 17px;
+
+    padding:3px 13px 16px;
+
+    border-radius:0 0 16px 16px;
+  }
+
+  .results > .resultHero::before{
+    width:42px;
+    margin-bottom:9px;
+  }
+
+  .product{
+    grid-template-columns:1fr;
+    gap:15px;
+
+    padding:12px;
+  }
+
+  .productImageBox{
+    height:200px;
+    min-height:200px;
+    padding:12px;
+  }
+
+  .productImage{
+    max-height:175px;
+    max-width:85%;
+  }
+
+  .productInfo{
+    padding:0 3px;
+  }
+
+  .productHeader{
+    min-height:61px;
+    padding-right:96px;
+  }
+
+  .productHeader .rank{
+    font-size:10px;
+  }
+
+  .productHeader h3{
+    font-size:19px;
+  }
+
+  .product > .score{
+    top:28px;
+    right:3px;
+
+    min-width:78px;
+
+    font-size:23px;
+  }
+
+  .product > .score::before{
+    font-size:9px;
+  }
+
+  .retailers{
+    margin-top:15px;
+    padding-top:14px;
+  }
+
+  .productInfo .retailers{
+    column-gap:5px;
+    padding-right:0;
+  }
+
+  .productInfo .retailers .retailer b{
+    font-size:9px;
+  }
+
+  .productInfo .retailers .retailer span{
+    font-size:9px;
+  }
+
+  .productInfo .retailers .retailer a,
+  .productInfo .retailers .retailer .button.primary{
+    min-height:31px;
+    font-size:8px;
+  }
+}
+
+@media(max-width:420px){
+
+  .results > h3{
+    font-size:20px;
+  }
+
+  .productImageBox{
+    height:180px;
+    min-height:180px;
+  }
+
+  .productImage{
+    max-height:155px;
+    max-width:85%;
+  }
+
+  .productHeader{
+    padding-right:84px;
+  }
+
+  .productHeader h3{
+    font-size:18px;
+  }
+
+  .product > .score{
+    top:27px;
+    font-size:21px;
+  }
+
+  .product > .score::before{
+    font-size:8px;
+  }
+}
+
