@@ -2758,3 +2758,246 @@ footer b {
 .retailer {
   overflow: hidden;
 }
+/* =========================================================
+   FINAL MOBILE WHERE TO BUY LAYOUT
+   Name + Buy button on first row
+   Price on second row
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .retailers {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-top: 24px !important;
+    overflow: visible !important;
+  }
+
+  .retailers h4 {
+    margin: 0 0 24px !important;
+    font-size: 24px !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Two retailer cards per row */
+  .retailerGrid {
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    column-gap: 24px !important;
+    row-gap: 28px !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    overflow: visible !important;
+  }
+
+  /*
+     Each retailer:
+
+     Amazon                 [ Buy ]
+     ₹38,490
+
+     The button occupies the
+     right side of the card.
+  */
+  .retailer {
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr) 112px !important;
+
+    grid-template-rows:
+      auto auto !important;
+
+    grid-template-areas:
+      "name button"
+      "price button" !important;
+
+    column-gap: 12px !important;
+    row-gap: 5px !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 0 16px !important;
+
+    align-items: center !important;
+
+    overflow: visible !important;
+
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+
+  /* Retailer name */
+  .retailer b {
+    grid-area: name !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 17px !important;
+    line-height: 22px !important;
+
+    font-weight: 800 !important;
+
+    /*
+       Do NOT trim the retailer name.
+    */
+    white-space: nowrap !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  /* Price */
+  .retailer span {
+    grid-area: price !important;
+
+    display: block !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    font-size: 16px !important;
+    line-height: 21px !important;
+
+    white-space: nowrap !important;
+    overflow: visible !important;
+  }
+
+  /* Buy button */
+  .retailer a.button,
+  .retailer .button {
+    grid-area: button !important;
+
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+
+    height: 52px !important;
+
+    margin: 0 !important;
+    padding: 0 12px !important;
+
+    display: flex !important;
+
+    align-items: center !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+
+    border-radius: 12px !important;
+
+    font-size: 15px !important;
+    line-height: 1 !important;
+
+    white-space: nowrap !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .retailerGrid {
+    column-gap: 18px !important;
+    row-gap: 24px !important;
+  }
+
+  .retailer {
+    grid-template-columns:
+      minmax(0, 1fr) 96px !important;
+
+    column-gap: 10px !important;
+
+    padding-bottom: 14px !important;
+  }
+
+  .retailer b {
+    font-size: 15px !important;
+    line-height: 20px !important;
+
+    /*
+       Allow the full retailer name.
+       Do not use ellipsis.
+    */
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+  }
+
+  .retailer span {
+    font-size: 15px !important;
+    line-height: 20px !important;
+  }
+
+  .retailer a.button,
+  .retailer .button {
+    width: 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+
+    height: 48px !important;
+
+    font-size: 14px !important;
+
+    border-radius: 10px !important;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .retailerGrid {
+    column-gap: 12px !important;
+  }
+
+  .retailer {
+    grid-template-columns:
+      minmax(0, 1fr) 86px !important;
+
+    column-gap: 8px !important;
+  }
+
+  .retailer b {
+    font-size: 14px !important;
+  }
+
+  .retailer span {
+    font-size: 14px !important;
+  }
+
+  .retailer a.button,
+  .retailer .button {
+    width: 86px !important;
+    min-width: 86px !important;
+    max-width: 86px !important;
+
+    height: 44px !important;
+
+    font-size: 13px !important;
+  }
+}
