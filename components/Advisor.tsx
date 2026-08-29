@@ -511,16 +511,16 @@ function Retailers({
             </span>
 
             {merchant.affiliate_url ? (
-              <a
-                className="button primary small"
-                href={`/api/click?merchant_id=${encodeURIComponent(
-                  merchant.id
-                )}`}
-                target="_blank"
-                rel="nofollow sponsored noopener"
-              >
-                Buy
-              </a>
+  <a
+    className="button primary small"
+    href={`/api/click?product=${encodeURIComponent(
+      product.id
+    )}&merchant=${encodeURIComponent(merchant.id)}`}
+    target="_blank"
+    rel="nofollow sponsored noopener"
+  >
+    Buy
+  </a>
             ) : (
               <button
                 className="button primary small"
