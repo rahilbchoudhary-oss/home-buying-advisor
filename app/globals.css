@@ -1,12 +1,13 @@
 :root{
   --bg:#f7f8fa;
-  --surface:#fff;
+  --surface:#ffffff;
   --ink:#101828;
   --muted:#667085;
   --line:#e4e7ec;
   --primary:#155eef;
   --soft:#eef4ff;
   --green:#079455;
+  --green-soft:#ecfdf3;
   --shadow:0 18px 55px rgba(16,24,40,.09);
 }
 
@@ -29,9 +30,9 @@ a{
   text-decoration:none;
 }
 
-/* =========================
+/* =========================================================
    GENERAL
-========================= */
+========================================================= */
 
 .container{
   width:min(1120px,92%);
@@ -71,12 +72,12 @@ a{
 .button.small{
   padding:8px 12px;
   font-size:12px;
-  min-width:65px;
+  min-width:70px;
 }
 
-/* =========================
+/* =========================================================
    NAVIGATION
-========================= */
+========================================================= */
 
 .nav{
   height:74px;
@@ -115,9 +116,9 @@ a{
   color:var(--primary);
 }
 
-/* =========================
+/* =========================================================
    HERO
-========================= */
+========================================================= */
 
 .hero{
   padding:82px 0;
@@ -212,9 +213,9 @@ a{
   font-size:14px;
 }
 
-/* =========================
+/* =========================================================
    SECTIONS
-========================= */
+========================================================= */
 
 .section{
   padding:75px 0;
@@ -285,9 +286,9 @@ a{
   color:#aab4c3;
 }
 
-/* =========================
+/* =========================================================
    ADVISOR
-========================= */
+========================================================= */
 
 .advisorShell{
   padding:65px 0;
@@ -399,14 +400,38 @@ a{
   margin:10px 0;
 }
 
-/* =========================
+/* =========================================================
    RESULTS
-========================= */
+========================================================= */
+
+/*
+  Hide the old "Your personalized shortlist" heading.
+  This is the <h3>{title}</h3> from Advisor.tsx.
+*/
+
+.results > h3{
+  display:none;
+}
+
+/*
+  Hide the old top result hero.
+
+  The product card below becomes the main result.
+*/
+
+.results > .resultHero{
+  display:none;
+}
 
 .resultsTitle{
   font-size:34px;
   letter-spacing:-1.4px;
   margin:0 0 20px;
+}
+
+.match{
+  color:var(--green);
+  font-weight:900;
 }
 
 .resultHero{
@@ -415,11 +440,6 @@ a{
   border-radius:20px;
   padding:22px;
   margin-bottom:28px;
-}
-
-.match{
-  color:var(--green);
-  font-weight:900;
 }
 
 .resultHero h2{
@@ -446,20 +466,20 @@ a{
   color:#344054;
 }
 
-/* =========================
+/* =========================================================
    PRODUCT LIST
-========================= */
+========================================================= */
 
 .productList{
   display:grid;
-  gap:18px;
+  gap:20px;
 }
 
 /*
-  DESKTOP PRODUCT CARD
-
-  Image on left.
-  Product details on right.
+  Product card:
+  LEFT  = image
+  RIGHT = information + retailers
+  BOTTOM = score + why this is a great match
 */
 
 .product{
@@ -472,11 +492,16 @@ a{
   background:#fff;
   overflow:hidden;
   position:relative;
+
+  /*
+    Extra bottom space for match-score / explanation.
+  */
+  padding-bottom:118px;
 }
 
-/* =========================
+/* =========================================================
    PRODUCT IMAGE
-========================= */
+========================================================= */
 
 .productImageBox{
   min-height:330px;
@@ -509,9 +534,9 @@ a{
   text-align:center;
 }
 
-/* =========================
+/* =========================================================
    PRODUCT INFORMATION
-========================= */
+========================================================= */
 
 .productInfo{
   min-width:0;
@@ -539,19 +564,102 @@ a{
   text-transform:uppercase;
 }
 
+/*
+  Existing score is moved to the bottom.
+*/
+
 .score{
-  font-size:28px;
+  position:absolute;
+  left:38px;
+  bottom:31px;
+  font-size:44px;
   line-height:1;
+  font-weight:900;
+  color:var(--green);
   white-space:nowrap;
+  z-index:2;
 }
 
 .productScore{
   display:none;
 }
 
-/* =========================
+/* =========================================================
+   WHY THIS IS A GREAT MATCH
+========================================================= */
+
+/*
+  Creates the visual explanation panel.
+
+  The text is intentionally generic because CSS does not have
+  access to room/budget/product recommendation data.
+*/
+
+.product::after{
+  content:"✓  Why this is a great match\A\A Matches your room size, budget and efficiency needs. This recommendation balances the important factors in your answers.";
+  white-space:pre-line;
+
+  position:absolute;
+  left:235px;
+  right:18px;
+  bottom:18px;
+
+  min-height:82px;
+
+  background:linear-gradient(
+    135deg,
+    #eff8ff,
+    #f7fbff
+  );
+
+  border-radius:14px;
+
+  padding:14px 18px 12px 54px;
+
+  color:#475467;
+  font-size:13px;
+  line-height:1.45;
+
+  display:flex;
+  align-items:center;
+
+  border:1px solid #e4efff;
+
+  box-sizing:border-box;
+}
+
+/*
+  Green check icon.
+*/
+
+.product::before{
+  content:"✓";
+
+  position:absolute;
+  left:253px;
+  bottom:40px;
+
+  width:30px;
+  height:30px;
+
+  border-radius:50%;
+
+  background:#d1fadf;
+  color:var(--green);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:18px;
+  font-weight:900;
+
+  z-index:2;
+}
+
+/* =========================================================
    RETAILERS / AFFILIATE LINKS
-========================= */
+========================================================= */
 
 .retailers{
   border-top:1px solid var(--line);
@@ -569,8 +677,11 @@ a{
   grid-template-columns:minmax(0,1fr) 130px 78px;
   gap:10px;
   align-items:center;
+
   border-bottom:1px solid #f0f2f5;
+
   padding:12px 0;
+
   font-size:14px;
 }
 
@@ -593,18 +704,20 @@ a{
 }
 
 /*
-  Important:
-  Keep affiliate Buy buttons clickable on mobile.
+  Keep affiliate Buy buttons visible and clickable.
 */
 
 .retailer .button.primary{
-  color:#fff;
   display:inline-flex;
+  visibility:visible;
+  opacity:1;
+  pointer-events:auto;
+  color:#fff;
 }
 
-/* =========================
-   DISCLAIMER / FOOTER
-========================= */
+/* =========================================================
+   DISCLAIMER
+========================================================= */
 
 .disclaimer{
   font-size:11px;
@@ -612,6 +725,10 @@ a{
   line-height:1.5;
   margin-top:18px;
 }
+
+/* =========================================================
+   FOOTER
+========================================================= */
 
 footer{
   background:#0b1220;
@@ -668,6 +785,23 @@ footer b{
   .retailer a{
     width:70px;
   }
+
+  .score{
+    left:28px;
+    bottom:28px;
+    font-size:38px;
+  }
+
+  .product::after{
+    left:180px;
+    right:16px;
+    bottom:16px;
+  }
+
+  .product::before{
+    left:198px;
+    bottom:38px;
+  }
 }
 
 /* =========================================================
@@ -696,6 +830,8 @@ footer b{
     padding:9px 14px;
     font-size:13px;
   }
+
+  /* HERO */
 
   .hero{
     padding:55px 0;
@@ -734,6 +870,8 @@ footer b{
     padding:20px;
   }
 
+  /* SECTIONS */
+
   .section{
     padding:55px 0;
   }
@@ -755,6 +893,8 @@ footer b{
     margin-top:20px;
   }
 
+  /* ADVISOR */
+
   .advisorShell{
     padding:35px 0 50px;
   }
@@ -774,39 +914,33 @@ footer b{
 
   .engine{
     width:94%;
-    padding:18px;
+    padding:16px;
     border-radius:20px;
   }
 
-  .resultsTitle{
-    font-size:30px;
-    line-height:1.1;
-  }
-
-  /* =========================
+  /* =====================================================
      MOBILE PRODUCT CARD
-  ========================= */
+  ===================================================== */
 
   .product{
     display:flex;
     flex-direction:column;
-    grid-template-columns:none;
-    gap:18px;
-    padding:14px;
-    border-radius:18px;
     width:100%;
+    gap:16px;
+
+    padding:12px;
+    padding-bottom:140px;
+
+    border-radius:18px;
   }
 
-  /*
-    Image becomes a compact,
-    visible product area.
-  */
+  /* IMAGE */
 
   .productImageBox{
     width:100%;
-    height:220px;
-    min-height:220px;
-    padding:18px;
+    height:210px;
+    min-height:210px;
+    padding:16px;
     border-radius:15px;
   }
 
@@ -814,10 +948,12 @@ footer b{
     width:100%;
     height:100%;
     max-width:100%;
-    max-height:190px;
+    max-height:180px;
     object-fit:contain;
     object-position:center;
   }
+
+  /* INFO */
 
   .productInfo{
     width:100%;
@@ -840,10 +976,7 @@ footer b{
     font-size:11px;
   }
 
-  .score{
-    font-size:22px;
-    flex-shrink:0;
-  }
+  /* TAGS */
 
   .tags{
     gap:6px;
@@ -855,9 +988,9 @@ footer b{
     font-size:11px;
   }
 
-  /* =========================
+  /* =====================================================
      MOBILE RETAILERS
-  ========================= */
+  ===================================================== */
 
   .retailers{
     margin-top:17px;
@@ -869,16 +1002,13 @@ footer b{
     margin-bottom:4px;
   }
 
-  /*
-    Three columns:
-    retailer | price | Buy
-  */
-
   .retailer{
     display:grid;
-    grid-template-columns:minmax(0,1fr) 90px 64px;
-    gap:6px;
+    grid-template-columns:minmax(0,1fr) 82px 62px;
+    gap:5px;
+
     padding:10px 0;
+
     font-size:13px;
     min-height:48px;
   }
@@ -895,18 +1025,21 @@ footer b{
   }
 
   .retailer a{
-    width:64px;
-    min-width:64px;
+    width:62px;
+    min-width:62px;
     height:36px;
+
     padding:7px 8px;
+
     font-size:12px;
+
     border-radius:10px;
+
     justify-self:end;
   }
 
   /*
-    Make sure affiliate links are always
-    visible and tappable.
+    Affiliate buttons stay visible and clickable.
   */
 
   .retailer .button.primary{
@@ -916,10 +1049,63 @@ footer b{
     pointer-events:auto;
   }
 
+  /* =====================================================
+     MOBILE MATCH SCORE
+  ===================================================== */
+
+  .score{
+    position:absolute;
+
+    left:20px;
+    bottom:82px;
+
+    font-size:34px;
+    line-height:1;
+
+    color:var(--green);
+
+    z-index:3;
+  }
+
+  /* =====================================================
+     MOBILE WHY PANEL
+  ===================================================== */
+
+  .product::after{
+    left:16px;
+    right:16px;
+    bottom:14px;
+
+    min-height:58px;
+
+    padding:10px 12px 10px 42px;
+
+    font-size:11px;
+    line-height:1.4;
+
+    border-radius:12px;
+
+    content:"✓  Why this is a great match\A\A Matches your room size, budget and efficiency needs.";
+  }
+
+  .product::before{
+    left:25px;
+    bottom:28px;
+
+    width:25px;
+    height:25px;
+
+    font-size:15px;
+  }
+
+  /* DISCLAIMER */
+
   .disclaimer{
     font-size:10px;
     line-height:1.45;
   }
+
+  /* FOOTER */
 
   footer .container{
     display:block;
@@ -939,39 +1125,22 @@ footer b{
 
   .engine{
     width:96%;
-    padding:14px;
-  }
-
-  .resultsTitle{
-    font-size:27px;
-  }
-
-  .resultHero{
-    padding:17px;
-    border-radius:17px;
-  }
-
-  .resultHero h2{
-    font-size:24px;
-    line-height:1.15;
-  }
-
-  .resultHero p{
-    font-size:14px;
-  }
-
-  .product{
     padding:12px;
   }
 
+  .product{
+    padding:10px;
+    padding-bottom:136px;
+  }
+
   .productImageBox{
-    height:190px;
-    min-height:190px;
-    padding:14px;
+    height:185px;
+    min-height:185px;
+    padding:12px;
   }
 
   .productImage{
-    max-height:165px;
+    max-height:160px;
   }
 
   .product h3{
@@ -979,17 +1148,38 @@ footer b{
   }
 
   .retailer{
-    grid-template-columns:minmax(0,1fr) 82px 60px;
-    gap:5px;
+    grid-template-columns:minmax(0,1fr) 76px 58px;
+    gap:4px;
   }
 
   .retailer a{
-    width:60px;
-    min-width:60px;
+    width:58px;
+    min-width:58px;
     font-size:11px;
   }
 
   .retailer span{
     font-size:11px;
+  }
+
+  .score{
+    left:17px;
+    bottom:78px;
+    font-size:31px;
+  }
+
+  .product::after{
+    left:13px;
+    right:13px;
+    bottom:12px;
+    padding-left:40px;
+    font-size:10px;
+  }
+
+  .product::before{
+    left:21px;
+    bottom:27px;
+    width:23px;
+    height:23px;
   }
 }
