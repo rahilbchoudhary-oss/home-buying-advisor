@@ -4,19 +4,20 @@ import { useMemo, useState } from "react";
 import { questions, type Answers } from "@/lib/questions";
 
 type Product = {
-  id:string;
-  name:string;
-  brand:string;
-  capacity:number;
-  star_rating:number;
-  price:number;
-  iseer:number;
-  noise_db:number;
-  smart:boolean;
-  air_quality:boolean;
-  warranty:string;
-  match_score:number;
-  image_url:string | null;
+  id: string;
+  name: string;
+  brand: string;
+  capacity: number;
+  star_rating: number;
+  price: number;
+  iseer: number;
+  noise_db: number;
+  smart: boolean;
+  air_quality: boolean;
+  warranty: string;
+  model_number?: string | null;
+  image_url?: string | null;
+  match_score: number;
 };
 
 const initial: Answers = {};
@@ -190,7 +191,6 @@ function Results({
     return (
       <div className="engine">
         <h2>No products matched yet.</h2>
-
         <button className="button primary" onClick={onRestart}>
           Try again
         </button>
@@ -202,6 +202,11 @@ function Results({
 
   return (
     <div className="engine results">
+
+      <h2 className="resultsTitle">
+        {title || "Your personalized shortlist"}
+      </h2>
+
       <div className="resultHero">
         <span className="match">
           🥇 {top.match_score}% MATCH
@@ -210,45 +215,56 @@ function Results({
         <h2>{top.name}</h2>
 
         <p>
-          Best fit for your {answers.room} room,{" "}
-          {answers.people} occupants, {answers.hours} daily usage
-          and {answers.budget} budget.
+          Best fit for your {answers.room} room, {answers.people} occupants,
+          {answers.hours} daily usage and {answers.budget} budget.
         </p>
 
         <div className="tags">
           <span>{top.capacity} Ton</span>
           <span>{top.star_rating} Star</span>
           <span>ISEER {top.iseer}</span>
-          <span>
-            ₹{top.price.toLocaleString("en-IN")}
-          </span>
+          <span>₹{top.price.toLocaleString("en-IN")}</span>
         </div>
       </div>
 
-      <h3>{title}</h3>
-
       <div className="productList">
+
         {products.map((p, i) => (
           <article className="product" key={p.id}>
-  {p.image_url && (
-    <img
-      src={p.image_url}
-      alt={p.name}
-      className="productImage"
-    />
-  )}
 
-  <div>
+            {/* PRODUCT IMAGE */}
+            <div className="productImageBox">
+              {p.image_url ? (
+                <img
+                  src={p.image_url}
+                  alt={p.name}
+                  className="productImage"
+                />
+              ) : (
+                <div className="productImagePlaceholder">
+                  AC image unavailable
+                </div>
+              )}
+            </div>
+
+            {/* PRODUCT INFORMATION */}
+            <div className="productInfo">
+
               <div className="rank">
-                {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}{" "}
                 {i === 0
-                  ? "Best Match"
+                  ? "🥇 BEST MATCH"
                   : i === 1
-                    ? "Alternative"
-                    : "Budget / specialty choice"}
+                    ? "🥈 ALTERNATIVE"
+                    : "🥉 BUDGET / SPECIALTY CHOICE"}
               </div>
 
-              <h3>{p.name}</h3>
+              <div className="productHeader">
+                <h3>{p.name}</h3>
+
+                <strong className="score">
+                  {p.match_score}%
+                </strong>
+              </div>
 
               <div className="tags">
                 <span>{p.capacity} Ton</span>
@@ -259,13 +275,18 @@ function Results({
               </div>
 
               <Retailers product={p} />
+
             </div>
 
-            <strong className="score">
-              {p.match_score}%
-            </strong>
+            {/* MATCH SCORE */}
+            <div className="productScore">
+              <strong>{p.match_score}%</strong>
+              <span>match</span>
+            </div>
+
           </article>
         ))}
+
       </div>
 
       <button
@@ -276,11 +297,11 @@ function Results({
       </button>
 
       <p className="disclaimer">
-        Affiliate disclosure: Home Buying Advisor may earn a
-        commission from qualifying purchases. Prices, stock,
-        specifications and offers should be verified on the
-        retailer page before purchase.
+        Affiliate disclosure: Home Buying Advisor may earn a commission
+        from qualifying purchases. Prices, stock, specifications and offers
+        should be verified on the retailer page before purchase.
       </p>
+
     </div>
   );
 }
