@@ -107,7 +107,7 @@ export async function POST(req: Request) {
         (a: any, b: any) =>
           b.match_score - a.match_score
       )
-      .slice(0, 3);
+      .slice(0, 7);
 
     /*
      * Record recommendation event.
