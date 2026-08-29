@@ -26,13 +26,13 @@ export async function POST(req: Request) {
       .from("products")
       .select(`
         *,
-        product_details (
-          id,
-          product_id,
-          description,
-          created_at,
-          updated_at
-        ),
+        product_details_relation:product_details (
+  id,
+  product_id,
+  description,
+  created_at,
+  updated_at
+),
         product_offers (
           id,
           product_id,
@@ -73,9 +73,10 @@ export async function POST(req: Request) {
          * the description string expected by Advisor.tsx
          */
         product_details:
-          Array.isArray(p.product_details)
-            ? p.product_details[0]?.description ?? null
-            : p.product_details?.description ?? null,
+  p.product_details ??
+  (Array.isArray(p.product_details_relation)
+    ? p.product_details_relation[0]?.description ?? null
+    : p.product_details_relation?.description ?? null),
 
         /*
          * Convert product_offers into the merchant
