@@ -230,7 +230,15 @@ function Results({
       <div className="productList">
         {products.map((p, i) => (
           <article className="product" key={p.id}>
-            <div>
+  {p.image_url && (
+    <img
+      src={p.image_url}
+      alt={p.name}
+      className="productImage"
+    />
+  )}
+
+  <div>
               <div className="rank">
                 {i === 0 ? "🥇" : i === 1 ? "🥈" : "🥉"}{" "}
                 {i === 0
