@@ -2124,3 +2124,236 @@ footer b {
     max-height: 100% !important;
   }
 }
+
+/* =========================================================
+   FINAL PRODUCT CARD ALIGNMENT
+   Image column follows the complete right-side content
+   ========================================================= */
+
+.product {
+  display: grid !important;
+  grid-template-columns: 40% minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  column-gap: 34px !important;
+}
+
+/* Image panel fills the full height of the product card */
+.productImageBox {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  align-self: stretch !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 24px !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  background: #f8fafc !important;
+  border: 1px solid #eef1f5 !important;
+  border-radius: 18px !important;
+}
+
+/* Product image stays nicely contained */
+.productImage {
+  display: block !important;
+
+  width: 100% !important;
+  height: auto !important;
+
+  max-width: 100% !important;
+  max-height: 360px !important;
+
+  margin: auto !important;
+  padding: 0 !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+/* Right side */
+.productInfo {
+  min-width: 0 !important;
+  width: 100% !important;
+  padding: 6px 0 0 !important;
+}
+
+/* Give the right side some breathing room */
+.productTopRow,
+.productTitleRow,
+.productInfo > .tags,
+.productDescription,
+.retailers {
+  width: 100% !important;
+}
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.productDescription {
+  margin-top: 22px !important;
+  padding: 20px 22px !important;
+
+  background: #f8fafc !important;
+  border: 1px solid #eef1f5 !important;
+  border-radius: 18px !important;
+}
+
+.productDescription h4 {
+  margin: 0 0 14px !important;
+  font-size: 20px !important;
+  line-height: 1.2 !important;
+}
+
+.productDescription ul {
+  margin: 0 !important;
+  padding-left: 22px !important;
+}
+
+.productDescription li {
+  margin: 7px 0 !important;
+  color: #475467 !important;
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+/* =========================================================
+   WHERE TO BUY
+   ========================================================= */
+
+.retailers {
+  margin-top: 24px !important;
+  padding-top: 22px !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+.retailers h4 {
+  margin: 0 0 18px !important;
+  font-size: 22px !important;
+}
+
+/* Four retailers in four equal columns */
+.retailerGrid {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 18px !important;
+  width: 100% !important;
+}
+
+.retailer {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+
+  min-width: 0 !important;
+
+  padding: 0 !important;
+
+  border: 0 !important;
+  gap: 8px !important;
+}
+
+.retailer b {
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+}
+
+.retailer span {
+  font-size: 15px !important;
+  color: #475467 !important;
+  white-space: nowrap !important;
+}
+
+.retailer .button {
+  width: 100% !important;
+  margin-top: 4px !important;
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .product {
+    grid-template-columns: 1fr !important;
+    row-gap: 22px !important;
+    column-gap: 0 !important;
+  }
+
+  .productImageBox {
+    width: 100% !important;
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+  }
+
+  .productImage {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 210px !important;
+    object-fit: contain !important;
+  }
+
+  .productInfo {
+    width: 100% !important;
+  }
+
+  .retailerGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  .retailer {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .retailer b {
+    font-size: 12px !important;
+  }
+
+  .retailer span {
+    font-size: 12px !important;
+  }
+
+  .retailer .button {
+    width: 100% !important;
+    padding: 9px 5px !important;
+    font-size: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .productImageBox {
+    height: 210px !important;
+    min-height: 210px !important;
+    max-height: 210px !important;
+  }
+
+  .retailerGrid {
+    gap: 5px !important;
+  }
+
+  .retailer b {
+    font-size: 11px !important;
+  }
+
+  .retailer span {
+    font-size: 11px !important;
+  }
+
+  .retailer .button {
+    font-size: 11px !important;
+    padding: 8px 3px !important;
+  }
+}
