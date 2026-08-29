@@ -17,6 +17,7 @@ type Product = {
   warranty: string;
   model_number?: string | null;
   image_url?: string | null;
+  product_details?: string | null;
   match_score: number;
 };
 
@@ -301,32 +302,21 @@ function Results({
               {/* PRODUCT SPECIFICATIONS */}
 
               <div className="tags">
+  <span>{p.capacity} Ton</span>
+  <span>{p.star_rating} Star</span>
+  <span>ISEER {p.iseer}</span>
+  <span>{p.noise_db} dB</span>
+  <span>{p.warranty}</span>
+</div>
 
-                <span>
-                  {p.capacity} Ton
-                </span>
+{p.product_details && (
+  <div className="productDescription">
+    <h4>Description</h4>
+    <p>{p.product_details}</p>
+  </div>
+)}
 
-                <span>
-                  {p.star_rating} Star
-                </span>
-
-                <span>
-                  ISEER {p.iseer}
-                </span>
-
-                <span>
-                  {p.noise_db} dB
-                </span>
-
-                <span>
-                  {p.warranty}
-                </span>
-
-              </div>
-
-              {/* WHERE TO BUY */}
-
-              <Retailers product={p} />
+<Retailers product={p} />
 
             </div>
 
