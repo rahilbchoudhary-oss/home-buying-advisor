@@ -41,14 +41,6 @@ export default function Advisor() {
     setError("");
   }
 
-  /*
-   * IMPORTANT:
-   * Check for the results screen BEFORE accessing questions[step].
-   *
-   * When step === questions.length, questions[step] is undefined.
-   * The previous version tried to read q.key first, causing:
-   * "Cannot read properties of undefined (reading 'key')"
-   */
   if (step === questions.length) {
     return (
       <Results
@@ -191,7 +183,11 @@ function Results({
     return (
       <div className="engine">
         <h2>No products matched yet.</h2>
-        <button className="button primary" onClick={onRestart}>
+
+        <button
+          className="button primary"
+          onClick={onRestart}
+        >
           Try again
         </button>
       </div>
@@ -203,16 +199,21 @@ function Results({
   return (
     <div className="engine results">
 
-      <h2 className="resultsTitle">
-        {title || "Your personalized shortlist"}
-      </h2>
+      {/* PERSONALIZED MATCH SUMMARY */}
 
       <div className="resultHero">
-        <span className="match">
-          🥇 {top.match_score}% MATCH
-        </span>
 
-        <h2>{top.name}</h2>
+        <div className="shortlistLabel">
+          {title || "Your personalized shortlist"}
+        </div>
+
+        <div className="topMatch">
+          <span className="match">
+            🥇 {top.match_score}% MATCH
+          </span>
+
+          <h2>{top.name}</h2>
+        </div>
 
         <p>
           Best fit for your {answers.room} room, {answers.people} occupants,
@@ -225,15 +226,24 @@ function Results({
           <span>ISEER {top.iseer}</span>
           <span>₹{top.price.toLocaleString("en-IN")}</span>
         </div>
+
       </div>
+
+      {/* PRODUCT RESULTS */}
 
       <div className="productList">
 
         {products.map((p, i) => (
-          <article className="product" key={p.id}>
+
+          <article
+            className="product"
+            key={p.id}
+          >
 
             {/* PRODUCT IMAGE */}
+
             <div className="productImageBox">
+
               {p.image_url ? (
                 <img
                   src={p.image_url}
@@ -245,52 +255,91 @@ function Results({
                   AC image unavailable
                 </div>
               )}
+
             </div>
 
             {/* PRODUCT INFORMATION */}
+
             <div className="productInfo">
 
-              <div className="rank">
-                {i === 0
-                  ? "🥇 BEST MATCH"
-                  : i === 1
-                    ? "🥈 ALTERNATIVE"
-                    : "🥉 BUDGET / SPECIALTY CHOICE"}
+              {/* RANK + SCORE ROW */}
+
+              <div className="productTopRow">
+
+                <div className="rank">
+                  {i === 0
+                    ? "🥇 BEST MATCH"
+                    : i === 1
+                      ? "🥈 ALTERNATIVE"
+                      : "🥉 BUDGET / SPECIALTY CHOICE"}
+                </div>
+
+                <div className="matchScore">
+
+                  <span>
+                    Your match score
+                  </span>
+
+                  <strong>
+                    {p.match_score}%
+                  </strong>
+
+                </div>
+
               </div>
 
-              <div className="productHeader">
-                <h3>{p.name}</h3>
+              {/* PRODUCT NAME + SCORE */}
 
-                <strong className="score">
-                  {p.match_score}%
-                </strong>
+              <div className="productTitleRow">
+
+                <h3>
+                  {p.name}
+                </h3>
+
               </div>
+
+              {/* PRODUCT SPECIFICATIONS */}
 
               <div className="tags">
-                <span>{p.capacity} Ton</span>
-                <span>{p.star_rating} Star</span>
-                <span>ISEER {p.iseer}</span>
-                <span>{p.noise_db} dB</span>
-                <span>{p.warranty}</span>
+
+                <span>
+                  {p.capacity} Ton
+                </span>
+
+                <span>
+                  {p.star_rating} Star
+                </span>
+
+                <span>
+                  ISEER {p.iseer}
+                </span>
+
+                <span>
+                  {p.noise_db} dB
+                </span>
+
+                <span>
+                  {p.warranty}
+                </span>
+
               </div>
+
+              {/* WHERE TO BUY */}
 
               <Retailers product={p} />
 
             </div>
 
-            {/* MATCH SCORE */}
-            <div className="productScore">
-              <strong>{p.match_score}%</strong>
-              <span>match</span>
-            </div>
-
           </article>
+
         ))}
 
       </div>
 
+      {/* START AGAIN */}
+
       <button
-        className="button secondary"
+        className="button secondary restartButton"
         onClick={onRestart}
       >
         ↻ Start again
@@ -306,7 +355,11 @@ function Results({
   );
 }
 
-function Retailers({ product }: { product: Product }) {
+function Retailers({
+  product,
+}: {
+  product: Product;
+}) {
   const rows = [
     ["Amazon", product.price],
     ["Flipkart", Math.max(product.price - 1000, 0)],
@@ -316,28 +369,47 @@ function Retailers({ product }: { product: Product }) {
 
   return (
     <div className="retailers">
-      <h4>Where to buy</h4>
 
-      {rows.map(([name, price]) => (
-        <div className="retailer" key={name}>
-          <b>{name}</b>
+      <h4>
+        Where to buy
+      </h4>
 
-          <span>
-            ₹{Number(price).toLocaleString("en-IN")}
-          </span>
+      <div className="retailerGrid">
 
-          <a
-            className="button primary small"
-            href={`/api/click?product=${encodeURIComponent(
-              product.id
-            )}&merchant=${encodeURIComponent(String(name))}`}
-            target="_blank"
-            rel="nofollow sponsored noopener"
+        {rows.map(([name, price]) => (
+
+          <div
+            className="retailer"
+            key={name}
           >
-            Buy
-          </a>
-        </div>
-      ))}
+
+            <b>
+              {name}
+            </b>
+
+            <span>
+              ₹{Number(price).toLocaleString("en-IN")}
+            </span>
+
+            <a
+              className="button primary small"
+              href={`/api/click?product=${encodeURIComponent(
+                product.id
+              )}&merchant=${encodeURIComponent(
+                String(name)
+              )}`}
+              target="_blank"
+              rel="nofollow sponsored noopener"
+            >
+              Buy
+            </a>
+
+          </div>
+
+        ))}
+
+      </div>
+
     </div>
   );
 }
