@@ -2357,3 +2357,301 @@ footer b {
     padding: 8px 3px !important;
   }
 }
+
+/* =========================================================
+   FINAL RETAILER / WHERE TO BUY FIX
+   Add this block LAST in app/globals.css
+   ========================================================= */
+
+/* ---------- DESKTOP ---------- */
+
+.retailers {
+  width: 100%;
+  margin-top: 28px;
+}
+
+.retailers h4 {
+  margin: 0 0 22px 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.retailerGrid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+  align-items: start;
+}
+
+.retailer {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.retailer b {
+  display: block;
+  white-space: nowrap;
+  font-size: 18px;
+  line-height: 1.25;
+  font-weight: 800;
+}
+
+.retailer span {
+  display: block;
+  white-space: nowrap;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.retailer .button {
+  width: 100%;
+  min-width: 0;
+  height: 48px;
+  padding: 0 18px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+  .retailerGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .retailer b {
+    font-size: 16px;
+  }
+
+  .retailer span {
+    font-size: 15px;
+  }
+
+  .retailer .button {
+    height: 44px;
+    font-size: 14px;
+    padding: 0 10px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .retailers {
+    width: 100%;
+    margin-top: 24px;
+  }
+
+  .retailers h4 {
+    font-size: 22px;
+    margin-bottom: 18px;
+  }
+
+  /*
+     Keep all four retailers in FOUR COLUMNS.
+
+     This prevents:
+     Amazon + Flipkart + Croma + Brand Store
+     from being squeezed into the same column.
+  */
+
+  .retailerGrid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(4, minmax(110px, 1fr));
+
+    gap: 12px;
+
+    width: 100%;
+
+    /*
+      If the phone is too narrow for four readable
+      columns, allow horizontal scrolling instead
+      of overlapping the content.
+    */
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding-bottom: 8px;
+
+    -webkit-overflow-scrolling: touch;
+
+    scrollbar-width: thin;
+  }
+
+  .retailer {
+    width: 100%;
+    min-width: 110px;
+
+    display: grid;
+
+    /*
+      Row 1 = retailer
+      Row 2 = price
+      Row 3 = Buy
+    */
+    grid-template-rows:
+      auto
+      auto
+      42px;
+
+    gap: 8px;
+
+    align-items: center;
+  }
+
+  .retailer b {
+    font-size: 15px;
+    line-height: 1.2;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .retailer span {
+    font-size: 14px;
+    line-height: 1.2;
+
+    white-space: nowrap;
+  }
+
+  .retailer .button {
+    width: 100%;
+    height: 42px;
+
+    min-width: 0;
+
+    margin: 0;
+    padding: 0 8px;
+
+    font-size: 14px;
+    line-height: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    white-space: nowrap;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .retailers {
+    margin-top: 22px;
+  }
+
+  .retailers h4 {
+    font-size: 21px;
+    margin-bottom: 16px;
+  }
+
+  /*
+     IMPORTANT:
+     Do NOT force the four retailers to shrink.
+     A minimum column width prevents text overlap.
+  */
+
+  .retailerGrid {
+    grid-template-columns:
+      repeat(4, minmax(105px, 105px));
+
+    gap: 10px;
+
+    width: 100%;
+
+    overflow-x: auto;
+    overflow-y: hidden;
+
+    padding-bottom: 8px;
+  }
+
+  .retailer {
+    min-width: 105px;
+    width: 105px;
+
+    grid-template-rows:
+      20px
+      20px
+      40px;
+
+    gap: 7px;
+  }
+
+  .retailer b {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .retailer span {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .retailer .button {
+    height: 40px;
+
+    font-size: 13px;
+
+    padding: 0 8px;
+
+    border-radius: 10px;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .retailerGrid {
+    grid-template-columns:
+      repeat(4, minmax(100px, 100px));
+
+    gap: 9px;
+  }
+
+  .retailer {
+    min-width: 100px;
+    width: 100px;
+  }
+
+  .retailer b {
+    font-size: 13px;
+  }
+
+  .retailer span {
+    font-size: 13px;
+  }
+
+  .retailer .button {
+    font-size: 12px;
+    height: 38px;
+  }
+}
