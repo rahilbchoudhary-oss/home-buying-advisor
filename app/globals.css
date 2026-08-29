@@ -1616,3 +1616,441 @@ footer b {
     font-size: 11px;
   }
 }
+/* =========================================================
+   FINAL FIX — RETAILER GRID
+   ========================================================= */
+
+/* Desktop: 4 equal retailer columns */
+.retailerGrid {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr)) !important;
+
+  gap: 18px !important;
+
+  align-items: start !important;
+
+  margin: 0 !important;
+
+  padding: 0 !important;
+}
+
+/* Individual retailer */
+.retailerGrid .retailer {
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  display: flex !important;
+
+  flex-direction: column !important;
+
+  align-items: stretch !important;
+
+  gap: 8px !important;
+
+  margin: 0 !important;
+
+  padding: 0 2px !important;
+
+  border: 0 !important;
+}
+
+/* Retailer name */
+.retailerGrid .retailer b {
+  display: block !important;
+
+  width: 100% !important;
+
+  font-size: 15px !important;
+
+  line-height: 1.25 !important;
+
+  font-weight: 800 !important;
+
+  white-space: nowrap !important;
+
+  overflow: hidden !important;
+
+  text-overflow: ellipsis !important;
+
+  margin: 0 !important;
+}
+
+/* Retailer price */
+.retailerGrid .retailer span {
+  display: block !important;
+
+  width: 100% !important;
+
+  font-size: 14px !important;
+
+  line-height: 1.25 !important;
+
+  color: #344054 !important;
+
+  white-space: nowrap !important;
+
+  margin: 0 !important;
+}
+
+/* Buy button */
+.retailerGrid .retailer .button {
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  margin: 2px 0 0 !important;
+
+  padding: 10px 12px !important;
+
+  font-size: 13px !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   FINAL PRODUCT CARD ALIGNMENT
+   ========================================================= */
+
+.product {
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 40fr)
+    minmax(0, 60fr) !important;
+
+  column-gap: 34px !important;
+
+  align-items: start !important;
+}
+
+.productImageBox {
+  width: 100% !important;
+
+  height: 300px !important;
+
+  min-height: 0 !important;
+
+  display: flex !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  overflow: hidden !important;
+}
+
+.productImage {
+  display: block !important;
+
+  width: 100% !important;
+
+  height: 100% !important;
+
+  max-width: 72% !important;
+
+  max-height: 230px !important;
+
+  object-fit: contain !important;
+
+  object-position: center !important;
+}
+
+.productInfo {
+  width: 100% !important;
+
+  min-width: 0 !important;
+}
+
+
+/* =========================================================
+   BEST MATCH + MATCH SCORE
+   ========================================================= */
+
+.productTopRow {
+  width: 100% !important;
+
+  display: flex !important;
+
+  flex-direction: row !important;
+
+  align-items: center !important;
+
+  justify-content: space-between !important;
+
+  gap: 20px !important;
+
+  min-height: 34px !important;
+}
+
+.productTopRow .rank {
+  flex: 1 1 auto !important;
+
+  min-width: 0 !important;
+
+  font-size: 18px !important;
+
+  line-height: 1.2 !important;
+
+  font-weight: 900 !important;
+
+  white-space: nowrap !important;
+
+  color: #155eef !important;
+}
+
+.matchScore {
+  flex: 0 0 auto !important;
+
+  display: flex !important;
+
+  align-items: baseline !important;
+
+  justify-content: flex-end !important;
+
+  gap: 8px !important;
+
+  white-space: nowrap !important;
+}
+
+.matchScore span {
+  font-size: 18px !important;
+
+  font-weight: 750 !important;
+
+  color: #475467 !important;
+}
+
+.matchScore strong {
+  font-size: 32px !important;
+
+  line-height: 1 !important;
+
+  font-weight: 900 !important;
+
+  color: #079455 !important;
+}
+
+
+/* =========================================================
+   PRODUCT NAME
+   ========================================================= */
+
+.productTitleRow {
+  width: 100% !important;
+
+  margin: 9px 0 10px !important;
+}
+
+.productTitleRow h3 {
+  margin: 0 !important;
+
+  font-size: 25px !important;
+
+  line-height: 1.2 !important;
+
+  font-weight: 850 !important;
+
+  letter-spacing: -0.7px !important;
+}
+
+
+/* =========================================================
+   WHERE TO BUY HEADER
+   ========================================================= */
+
+.retailers {
+  width: 100% !important;
+
+  margin-top: 18px !important;
+
+  padding-top: 18px !important;
+
+  border-top: 1px solid #e4e7ec !important;
+
+  display: block !important;
+}
+
+.retailers h4 {
+  width: 100% !important;
+
+  margin: 0 0 14px !important;
+
+  padding: 0 !important;
+
+  font-size: 21px !important;
+
+  line-height: 1.2 !important;
+
+  font-weight: 850 !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .product {
+    grid-template-columns: 1fr !important;
+
+    gap: 18px !important;
+
+    padding: 16px !important;
+  }
+
+  .productImageBox {
+    height: 230px !important;
+  }
+
+  .productImage {
+    max-width: 70% !important;
+
+    max-height: 190px !important;
+  }
+
+  .productTopRow {
+    gap: 10px !important;
+
+    min-height: 28px !important;
+  }
+
+  .productTopRow .rank {
+    font-size: 13px !important;
+  }
+
+  .matchScore {
+    gap: 5px !important;
+  }
+
+  .matchScore span {
+    font-size: 12px !important;
+  }
+
+  .matchScore strong {
+    font-size: 22px !important;
+  }
+
+
+  /* -----------------------------------------------
+     MOBILE RETAILERS
+
+     Amazon       ₹38,999    [Buy]
+     Flipkart     ₹37,999    [Buy]
+     Croma        ₹39,490    [Buy]
+     Brand Store  ₹39,999    [Buy]
+     ----------------------------------------------- */
+
+  .retailerGrid {
+    display: block !important;
+
+    width: 100% !important;
+  }
+
+  .retailerGrid .retailer {
+    width: 100% !important;
+
+    min-height: 44px !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto
+      auto !important;
+
+    align-items: center !important;
+
+    column-gap: 10px !important;
+
+    padding: 9px 0 !important;
+
+    border-bottom: 1px solid #f0f2f5 !important;
+  }
+
+  .retailerGrid .retailer:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .retailerGrid .retailer b {
+    width: auto !important;
+
+    min-width: 0 !important;
+
+    font-size: 13px !important;
+
+    white-space: nowrap !important;
+
+    overflow: hidden !important;
+
+    text-overflow: ellipsis !important;
+  }
+
+  .retailerGrid .retailer span {
+    width: auto !important;
+
+    font-size: 12px !important;
+
+    white-space: nowrap !important;
+  }
+
+  .retailerGrid .retailer .button {
+    width: auto !important;
+
+    min-width: 60px !important;
+
+    padding: 7px 10px !important;
+
+    font-size: 11px !important;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .productTopRow .rank {
+    font-size: 12px !important;
+  }
+
+  .matchScore span {
+    font-size: 11px !important;
+  }
+
+  .matchScore strong {
+    font-size: 20px !important;
+  }
+
+  .productTitleRow h3 {
+    font-size: 18px !important;
+  }
+
+  .retailerGrid .retailer {
+    column-gap: 7px !important;
+  }
+
+  .retailerGrid .retailer b {
+    font-size: 12px !important;
+  }
+
+  .retailerGrid .retailer span {
+    font-size: 11px !important;
+  }
+
+  .retailerGrid .retailer .button {
+    min-width: 56px !important;
+
+    padding: 7px 8px !important;
+
+    font-size: 10px !important;
+  }
+}
