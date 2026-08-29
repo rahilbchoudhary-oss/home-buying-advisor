@@ -2054,3 +2054,73 @@ footer b {
     font-size: 10px !important;
   }
 }
+/* =========================================================
+   FINAL PRODUCT IMAGE FIX
+   Keep this as the LAST .productImage rule in the file
+   ========================================================= */
+
+.productImageBox {
+  width: 100% !important;
+  height: 300px !important;
+  min-height: 300px !important;
+  max-height: 300px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+
+  overflow: hidden !important;
+
+  background: #f8fafc !important;
+  border: 1px solid #eef1f5 !important;
+  border-radius: 18px !important;
+}
+
+.productImage {
+  display: block !important;
+
+  width: 100% !important;
+  height: 100% !important;
+
+  max-width: 100% !important;
+  max-height: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  object-fit: contain !important;
+  object-position: center !important;
+}
+@media (max-width: 800px) {
+  .productImageBox {
+    height: 230px !important;
+    min-height: 230px !important;
+    max-height: 230px !important;
+  }
+
+  .productImage {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .productImageBox {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+  }
+
+  .productImage {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+}
