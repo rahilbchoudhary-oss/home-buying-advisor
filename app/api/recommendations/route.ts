@@ -19,9 +19,9 @@ export async function POST(req: Request) {
      * Get active AC products together with:
      *
      * 1. Product details
-     * 2. Active merchants / affiliate offers
+     * 2. Merchants / affiliate offers
      *
-     * Everything is now controlled from Supabase.
+     * Both are controlled from Supabase.
      */
     const { data, error } = await supabase
       .from("products")
@@ -55,8 +55,6 @@ export async function POST(req: Request) {
 
     /*
      * Calculate recommendation score.
-     *
-     * Only active merchants are returned to the website.
      */
     const products = (data ?? [])
       .map((p: any) => ({
@@ -64,8 +62,24 @@ export async function POST(req: Request) {
 
         match_score: scoreProduct(p, answers),
 
+        /*
+         * Supabase may return product_details
+         * as an array because of the relationship.
+         *
+         * Convert it into the description string
+         * expected by Advisor.tsx.
+         */
+        product_details:
+          Array.isArray(p.product_details)
+            ? p.product_details[0]?.description ?? null
+            : p.product_details?.description ?? null,
+
+        /*
+         * Only active merchants should reach the UI.
+         */
         merchants: (p.merchants ?? []).filter(
-          (merchant: any) => merchant.active === true
+          (merchant: any) =>
+            merchant.active === true
         ),
       }))
       .sort(
