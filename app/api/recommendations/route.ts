@@ -15,23 +15,36 @@ export async function POST(req: Request) {
 
     const supabase = supabaseAdmin();
 
+    /*
+     * Get active AC products together with:
+     *
+     * 1. Product details
+     * 2. Active merchants / affiliate offers
+     *
+     * Everything is now controlled from Supabase.
+     */
     const { data, error } = await supabase
       .from("products")
       .select(`
-        id,
-        name,
-        brand,
-        capacity,
-        star_rating,
-        price,
-        iseer,
-        noise_db,
-        smart,
-        air_quality,
-        warranty,
-        model_number,
-        image_url,
-        product_details
+        *,
+        product_details (
+          id,
+          product_id,
+          description,
+          created_at,
+          updated_at
+        ),
+        merchants (
+          id,
+          name,
+          product_id,
+          price,
+          affiliate_url,
+          active,
+          last_checked_at,
+          created_at,
+          updated_at
+        )
       `)
       .eq("category", "ac")
       .eq("active", true);
@@ -40,10 +53,20 @@ export async function POST(req: Request) {
       throw error;
     }
 
+    /*
+     * Calculate recommendation score.
+     *
+     * Only active merchants are returned to the website.
+     */
     const products = (data ?? [])
       .map((p: any) => ({
         ...p,
+
         match_score: scoreProduct(p, answers),
+
+        merchants: (p.merchants ?? []).filter(
+          (merchant: any) => merchant.active === true
+        ),
       }))
       .sort(
         (a: any, b: any) =>
@@ -51,6 +74,9 @@ export async function POST(req: Request) {
       )
       .slice(0, 3);
 
+    /*
+     * Record recommendation event.
+     */
     await supabase
       .from("recommendation_events")
       .insert({
