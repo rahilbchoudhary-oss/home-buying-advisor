@@ -3,33 +3,10 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <header className="nav">
-        <div className="container navin">
-          <Link
-            className="logo"
-            href="/"
-            aria-label="Home Buying Advisor"
-          >
-            <img
-              src="/logo.png"
-              alt="Home Buying Advisor"
-            />
-          </Link>
-
-          <nav>
-            <Link href="#how">How it works</Link>
-            <Link href="#why">Why us</Link>
-          </nav>
-
-          <Link className="button primary" href="/ac-advisor">
-            Find my AC
-          </Link>
-        </div>
-      </header>
-
       <main>
         <section className="hero">
           <div className="container heroGrid">
+
             <div>
               <div className="eyebrow">
                 Personalized buying decisions
@@ -66,6 +43,7 @@ export default function Home() {
 
             <div className="heroCard">
               <div className="mock">
+
                 <div className="mockTop">
                   <b>YOUR AC MATCH</b>
                   <span>94% match</span>
@@ -84,13 +62,16 @@ export default function Home() {
                 <p>
                   Personalized instead of a generic “top 10”.
                 </p>
+
               </div>
             </div>
+
           </div>
         </section>
 
         <section className="section" id="how">
           <div className="container">
+
             <div className="sectionHead">
               <div className="eyebrow">
                 The product
@@ -107,6 +88,7 @@ export default function Home() {
             </div>
 
             <div className="cards">
+
               <Card
                 n="1"
                 title="Tell us your needs"
@@ -124,12 +106,14 @@ export default function Home() {
                 title="Compare where to buy"
                 text="See retailer offers and use tracked affiliate links when you are ready."
               />
+
             </div>
           </div>
         </section>
 
         <section className="dark">
           <div className="container cta">
+
             <div>
               <div className="eyebrow">
                 AC decision engine
@@ -150,11 +134,13 @@ export default function Home() {
             >
               Start now →
             </Link>
+
           </div>
         </section>
 
         <section className="section" id="why">
           <div className="container">
+
             <div className="sectionHead">
               <div className="eyebrow">
                 Why it works
@@ -166,6 +152,7 @@ export default function Home() {
             </div>
 
             <div className="cards">
+
               <Card
                 title="Room-first sizing"
                 text="Capacity is a core part of the match, not a footnote."
@@ -180,6 +167,7 @@ export default function Home() {
                 title="Budget-aware"
                 text="The shortlist respects the shopper's maximum budget."
               />
+
             </div>
           </div>
         </section>
