@@ -3141,3 +3141,146 @@ footer b {
     font-size: 20px !important;
   }
 }
+
+/* =========================================================
+   WHY THIS MATCH
+   Dynamic explanation generated from scoring engine
+========================================================= */
+
+.whyMatch {
+  margin: 18px 0 20px;
+  padding: 16px 18px;
+
+  background: linear-gradient(
+    135deg,
+    #f8fbff,
+    #ffffff
+  );
+
+  border: 1px solid #dbe7f8;
+  border-radius: 14px;
+}
+
+.whyMatchHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+}
+
+.whyMatchIcon {
+  flex: 0 0 auto;
+
+  width: 27px;
+  height: 27px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #ecfdf3;
+  color: #079455;
+
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.whyMatchHeader h4 {
+  margin: 0;
+
+  color: #101828;
+
+  font-size: 15px;
+  line-height: 1.2;
+  font-weight: 850;
+}
+
+.whyMatchHeader p {
+  margin: 3px 0 0;
+
+  color: #667085;
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.whyMatchList {
+  display: grid;
+
+  gap: 8px;
+
+  margin: 13px 0 0;
+  padding: 0;
+
+  list-style: none;
+}
+
+.whyMatchItem {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 9px;
+
+  color: #475467;
+
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.whyMatchBullet {
+  flex: 0 0 auto;
+
+  width: 18px;
+  height: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 1px;
+
+  border-radius: 50%;
+
+  background: #ecfdf3;
+  color: #079455;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.whyMatchItem.negative .whyMatchBullet {
+  background: #fff1f3;
+  color: #b42318;
+}
+
+.whyMatchItem.negative {
+  color: #667085;
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 800px) {
+
+  .whyMatch {
+    margin: 15px 0 17px;
+
+    padding: 14px;
+  }
+
+  .whyMatchHeader h4 {
+    font-size: 14px;
+  }
+
+  .whyMatchHeader p {
+    font-size: 10px;
+  }
+
+  .whyMatchItem {
+    font-size: 11px;
+  }
+}
