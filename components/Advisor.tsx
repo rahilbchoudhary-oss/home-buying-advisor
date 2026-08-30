@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { questions, type Answers } from "@/lib/questions";
-import { explainMatch, type MatchReason } from "@/lib/scoring";
-import { matchLabel } from "@/lib/scoring";
+import { explainMatch } from "@/lib/scoring";
 
 type Merchant = {
   id: string;
@@ -34,8 +33,6 @@ type Product = {
   product_details?: string | null;
   merchants?: Merchant[];
   match_score: number;
-  has_active_offer?: boolean;
-  active_offer_count?: number;
 };
 
 const initial: Answers = {};
@@ -60,10 +57,10 @@ export default function Advisor() {
   }
 
   /*
-   * Results screen.
+   * Results screen
    *
    * IMPORTANT:
-   * Check this before accessing questions[step].
+   * Check this BEFORE accessing questions[step].
    */
   if (step === questions.length) {
     return (
@@ -196,10 +193,6 @@ export default function Advisor() {
   );
 }
 
-/* =========================================================
-   RESULTS
-   ========================================================= */
-
 function Results({
   products,
   answers,
@@ -226,33 +219,7 @@ function Results({
     );
   }
 
-  /*
-   * DATA-SCIENCE PRINCIPLE
-   *
-   * Match score = product fit.
-   *
-   * Availability is treated separately.
-   *
-   * An affiliate offer does not increase the product's
-   * match score.
-   */
-
-  const availableProducts = products.filter((product) =>
-    hasBuyableOffer(product)
-  );
-
-  const unavailableProducts = products.filter(
-    (product) => !hasBuyableOffer(product)
-  );
-
-  /*
-   * The API is responsible for ranking.
-   *
-   * We preserve the API ranking while separating
-   * commercially available products from unavailable ones.
-   */
-
-  const top = availableProducts[0] ?? products[0];
+  const top = products[0];
 
   return (
     <div className="engine results">
@@ -278,9 +245,8 @@ function Results({
         </div>
 
         <p>
-          Best fit for your {answers.room} room,{" "}
-          {answers.people} occupants, {answers.hours} daily usage
-          and {answers.budget} budget.
+          Best fit for your {answers.room} room, {answers.people} occupants,
+          {answers.hours} daily usage and {answers.budget} budget.
         </p>
 
         <div className="tags">
@@ -298,7 +264,7 @@ function Results({
           </span>
 
           <span>
-            ₹{Number(top.price).toLocaleString("en-IN")}
+            ₹{top.price.toLocaleString("en-IN")}
           </span>
 
         </div>
@@ -306,98 +272,145 @@ function Results({
       </div>
 
       {/* =====================================================
-          AVAILABLE PRODUCTS
+          PRODUCT RESULTS
           ===================================================== */}
 
-      {availableProducts.length > 0 && (
-        <>
-          <div
-            className="resultsSectionHeading"
-            style={{
-              margin: "8px 0 14px",
-            }}
+      <div className="productList">
+
+        {products.map((p, i) => (
+
+          <article
+            className="product"
+            key={p.id}
           >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 24,
-              }}
-            >
-              Available to buy now
-            </h2>
 
-            <p
-              className="muted"
-              style={{
-                margin: "5px 0 0",
-              }}
-            >
-              Products that match your requirements and currently
-              have an active retailer offer.
-            </p>
-          </div>
+            {/* =================================================
+                PRODUCT IMAGE
+                ================================================= */}
 
-          <div className="productList">
+            <div className="productImageBox">
 
-            {availableProducts.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                rank={index}
-                available
+              {p.image_url ? (
+
+                <img
+                  src={p.image_url}
+                  alt={p.name}
+                  className="productImage"
+                />
+
+              ) : (
+
+                <div className="productImagePlaceholder">
+                  AC image unavailable
+                </div>
+
+              )}
+
+            </div>
+
+            {/* =================================================
+                PRODUCT INFORMATION
+                ================================================= */}
+
+            <div className="productInfo">
+
+              {/* RANK + MATCH SCORE */}
+
+              <div className="productTopRow">
+
+                <div className="rank">
+
+                  {i === 0
+                    ? "🥇 BEST MATCH"
+                    : i === 1
+                      ? "🥈 ALTERNATIVE"
+                      : "🥉 BUDGET / SPECIALTY CHOICE"}
+
+                </div>
+
+                <div className="matchScore">
+
+                  <span>
+                    Your match score
+                  </span>
+
+                  <strong>
+                    {p.match_score}%
+                  </strong>
+
+                </div>
+
+              </div>
+
+              {/* PRODUCT NAME */}
+
+              <div className="productTitleRow">
+
+                <h3>
+                  {p.name}
+                </h3>
+
+              </div>
+
+              {/* PRODUCT SPECIFICATIONS */}
+
+              <div className="tags">
+
+                <span>
+                  {p.capacity} Ton
+                </span>
+
+                <span>
+                  {p.star_rating} Star
+                </span>
+
+                <span>
+                  ISEER {p.iseer}
+                </span>
+
+                <span>
+                  {p.noise_db} dB
+                </span>
+
+                <span>
+                  {p.warranty}
+                </span>
+
+              </div>
+
+              {/* =================================================
+                  WHY THIS MATCH
+                  ================================================= */}
+
+              <WhyThisMatch
+                product={p}
+                answers={answers}
               />
-            ))}
 
-          </div>
-        </>
-      )}
+              {/* =================================================
+                  DESCRIPTION FROM SUPABASE
+                  Maximum 3 bullet points
+                  ================================================= */}
 
-      {/* =====================================================
-          UNAVAILABLE PRODUCTS
-          ===================================================== */}
+              {p.product_details && (
+                <ProductDescription
+                  description={p.product_details}
+                />
+              )}
 
-      {unavailableProducts.length > 0 && (
-        <>
-          <div
-            className="resultsSectionHeading"
-            style={{
-              margin: "30px 0 14px",
-            }}
-          >
-            <h2
-              style={{
-                margin: 0,
-                fontSize: 24,
-              }}
-            >
-              Strong matches — currently unavailable
-            </h2>
+              {/* =================================================
+                  MERCHANTS FROM SUPABASE
+                  ================================================= */}
 
-            <p
-              className="muted"
-              style={{
-                margin: "5px 0 0",
-              }}
-            >
-              These products scored well for your needs, but we
-              do not have an active retailer offer right now.
-            </p>
-          </div>
+              <Retailers product={p} />
 
-          <div className="productList">
+            </div>
 
-            {unavailableProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                rank={-1}
-                available={false}
-              />
-            ))}
+          </article>
 
-          </div>
-        </>
-      )}
+        ))}
+
+      </div>
 
       {/* =====================================================
           START AGAIN
@@ -411,203 +424,25 @@ function Results({
       </button>
 
       <p className="disclaimer">
-        Affiliate disclosure: Home Buying Advisor may earn a
-        commission from qualifying purchases. Prices, stock,
-        specifications and offers should be verified on the
-        retailer page before purchase.
+        Affiliate disclosure: Home Buying Advisor may earn a commission
+        from qualifying purchases. Prices, stock, specifications and offers
+        should be verified on the retailer page before purchase.
       </p>
 
     </div>
   );
 }
 
-/* =========================================================
-   CHECK WHETHER PRODUCT IS CURRENTLY BUYABLE
-   ========================================================= */
-
-function hasBuyableOffer(product: Product): boolean {
-  if (product.has_active_offer === true) {
-    return true;
-  }
-
-  return (product.merchants ?? []).some(
-    (merchant) =>
-      merchant.active === true &&
-      merchant.price !== null &&
-      Boolean(merchant.affiliate_url)
-  );
-}
-
-/* =========================================================
-   PRODUCT CARD
-   ========================================================= */
-
-function ProductCard({
-  product: p,
-  rank,
-  available,
-}: {
-  product: Product;
-  rank: number;
-  available: boolean;
-}) {
-  /*
-   * Calibrated match label.
-   *
-   * Examples:
-   *
-   * 85+  = Excellent Match
-   * 75+  = Very Good Match
-   * 65+  = Good Match
-   * 50+  = Fair Match
-   * <50  = Weak Match
-   */
-  const calibratedLabel = matchLabel(p.match_score);
-
-  return (
-    <article
-      className="product"
-      style={
-        !available
-          ? {
-              opacity: 0.94,
-            }
-          : undefined
-      }
-    >
-
-      {/* =================================================
-          PRODUCT IMAGE
-          ================================================= */}
-
-      <div className="productImageBox">
-
-        {p.image_url ? (
-          <img
-            src={p.image_url}
-            alt={p.name}
-            className="productImage"
-          />
-        ) : (
-          <div className="productImagePlaceholder">
-            AC image unavailable
-          </div>
-        )}
-
-      </div>
-
-      {/* =================================================
-          PRODUCT INFORMATION
-          ================================================= */}
-
-      <div className="productInfo">
-
-        {/* RANK + MATCH SCORE */}
-
-        <div className="productTopRow">
-
-          <div className="rank">
-
-            {available ? (
-              rank === 0 ? (
-                "🥇 BEST MATCH"
-              ) : rank === 1 ? (
-                "🥈 ALTERNATIVE"
-              ) : (
-                `⭐ ${calibratedLabel.toUpperCase()}`
-              )
-            ) : (
-              <>
-                🔎 {calibratedLabel.toUpperCase()}{" "}
-                — CURRENTLY UNAVAILABLE
-              </>
-            )}
-
-          </div>
-
-          <div className="matchScore">
-
-            <span>
-              Your match score
-            </span>
-
-            <strong>
-              {p.match_score}%
-            </strong>
-
-          </div>
-
-        </div>
-
-        {/* PRODUCT NAME */}
-
-        <div className="productTitleRow">
-
-          <h3>
-            {p.name}
-          </h3>
-
-        </div>
-
-        {/* PRODUCT SPECIFICATIONS */}
-
-        <div className="tags">
-
-          <span>
-            {p.capacity} Ton
-          </span>
-
-          <span>
-            {p.star_rating} Star
-          </span>
-
-          <span>
-            ISEER {p.iseer}
-          </span>
-
-          <span>
-            {p.noise_db} dB
-          </span>
-
-          <span>
-            {p.warranty}
-          </span>
-
-        </div>
-        
-        <WhyThisMatch
-  product={p}
-  answers={answers}
-/>
-        
-        {/* DESCRIPTION */}
-
-        {p.product_details && (
-          <ProductDescription
-            description={p.product_details}
-          />
-        )}
-
-        {/* RETAILERS */}
-
-        <Retailers product={p} />
-
-      </div>
-
-    </article>
-  );
-}
 
 /* =========================================================
    WHY THIS MATCH
 
-   Generates the explanation directly from the scoring engine.
+   Uses the SAME scoring engine that produces the match
+   explanation.
 
    IMPORTANT:
-   We do NOT manually write product-specific reasons here.
-
-   explainMatch() uses the same scoring logic that produced
-   the match score.
+   Do not import matchLabel.
+   It does not exist in scoring.ts.
    ========================================================= */
 
 function WhyThisMatch({
@@ -633,6 +468,7 @@ function WhyThisMatch({
         </span>
 
         <div>
+
           <h4>
             Why this match?
           </h4>
@@ -640,6 +476,7 @@ function WhyThisMatch({
           <p>
             Based on your answers and this product's specifications.
           </p>
+
         </div>
 
       </div>
@@ -674,6 +511,9 @@ function WhyThisMatch({
 
 /* =========================================================
    PRODUCT DESCRIPTION
+
+   Reads description from Supabase and converts it into
+   maximum 3 bullet points.
    ========================================================= */
 
 function ProductDescription({
@@ -703,19 +543,25 @@ function ProductDescription({
       </h4>
 
       <ul>
+
         {points.map((point, index) => (
           <li key={index}>
             {point}
           </li>
         ))}
+
       </ul>
 
     </div>
   );
 }
 
+
 /* =========================================================
    RETAILERS
+
+   Merchants are controlled completely from Supabase.
+   No Amazon / Flipkart / Croma / Brand Store is hard-coded.
    ========================================================= */
 
 function Retailers({
@@ -773,11 +619,10 @@ function Retailers({
             </span>
 
             {merchant.affiliate_url ? (
+
               <a
                 className="button primary small"
-                href={`/api/click?product=${encodeURIComponent(
-                  product.id
-                )}&merchant=${encodeURIComponent(
+                href={`/api/click?merchant_id=${encodeURIComponent(
                   merchant.id
                 )}`}
                 target="_blank"
@@ -785,13 +630,16 @@ function Retailers({
               >
                 Buy
               </a>
+
             ) : (
+
               <button
                 className="button primary small"
                 disabled
               >
                 Buy
               </button>
+
             )}
 
           </div>
