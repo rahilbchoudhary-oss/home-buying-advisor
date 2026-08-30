@@ -3001,3 +3001,143 @@ footer b {
     font-size: 13px !important;
   }
 }
+
+/* =========================================================
+   FINAL FIX — PRODUCT TOP ROW / MATCH SCORE
+   Prevent rank label from overlapping match score
+   ========================================================= */
+
+.productTopRow {
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto !important;
+
+  align-items: center !important;
+
+  column-gap: 18px !important;
+
+  min-width: 0 !important;
+}
+
+/* Match label */
+.productTopRow .rank {
+  min-width: 0 !important;
+
+  width: 100% !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  font-size: 16px !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+
+  color: #155eef !important;
+
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Score stays in its own column */
+.productTopRow .matchScore {
+  min-width: max-content !important;
+
+  display: flex !important;
+
+  align-items: baseline !important;
+  justify-content: flex-end !important;
+
+  gap: 7px !important;
+
+  white-space: nowrap !important;
+}
+
+/* "Your match score" */
+.productTopRow .matchScore span {
+  font-size: 15px !important;
+  font-weight: 750 !important;
+
+  color: #475467 !important;
+}
+
+/* 70%, 63%, etc. */
+.productTopRow .matchScore strong {
+  font-size: 30px !important;
+  line-height: 1 !important;
+
+  font-weight: 900 !important;
+
+  color: #079455 !important;
+}
+
+
+/* =========================================================
+   UNAVAILABLE CARDS
+   Slightly smaller rank label so long labels remain clean
+   ========================================================= */
+
+.product:has(.rank) .productTopRow .rank {
+  letter-spacing: -0.15px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .productTopRow {
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto !important;
+
+    column-gap: 10px !important;
+  }
+
+  .productTopRow .rank {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+  }
+
+  .productTopRow .matchScore {
+    gap: 4px !important;
+  }
+
+  .productTopRow .matchScore span {
+    font-size: 11px !important;
+  }
+
+  .productTopRow .matchScore strong {
+    font-size: 21px !important;
+  }
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 480px) {
+
+  .productTopRow {
+    column-gap: 7px !important;
+  }
+
+  .productTopRow .rank {
+    font-size: 11px !important;
+  }
+
+  .productTopRow .matchScore span {
+    font-size: 10px !important;
+  }
+
+  .productTopRow .matchScore strong {
+    font-size: 20px !important;
+  }
+}
