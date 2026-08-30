@@ -16,23 +16,23 @@ export async function POST(req: Request) {
     const supabase = supabaseAdmin();
 
     /*
-     * Get active AC products together with:
+     * Retrieve active AC products together with:
      *
      * 1. Product details
      * 2. Product-specific offers
-     * 3. Merchant information for each offer
+     * 3. Merchant information
      */
     const { data, error } = await supabase
       .from("products")
       .select(`
         *,
         product_details_relation:product_details (
-  id,
-  product_id,
-  description,
-  created_at,
-  updated_at
-),
+          id,
+          product_id,
+          description,
+          created_at,
+          updated_at
+        ),
         product_offers (
           id,
           product_id,
@@ -58,38 +58,35 @@ export async function POST(req: Request) {
     }
 
     /*
-     * Calculate recommendation score.
+     * Build recommendation dataset.
      *
-     * Only active product offers are returned.
+     * The scoring engine should use the price that the
+     * user can actually buy the product for.
+     *
+     * Therefore:
+     *
+     * active retailer offer price
+     *          ↓
+     * lowest active offer price
+     *          ↓
+     * used for budget scoring
+     *
+     * If no active offer exists, we fall back to the
+     * product table price.
      */
     const products = (data ?? [])
-      .map((p: any) => ({
-        ...p,
-
-        match_score: scoreProduct(p, answers),
-
+      .map((p: any) => {
         /*
-         * Convert product_details relationship into
-         * the description string expected by Advisor.tsx
+         * Keep only valid active retailer offers.
          */
-        product_details:
-  p.product_details ??
-  (Array.isArray(p.product_details_relation)
-    ? p.product_details_relation[0]?.description ?? null
-    : p.product_details_relation?.description ?? null),
-
-        /*
-         * Convert product_offers into the merchant
-         * structure expected by the frontend.
-         *
-         * Each offer belongs to one specific product
-         * and one specific merchant.
-         */
-        merchants: (p.product_offers ?? [])
+        const merchants = (p.product_offers ?? [])
           .filter(
             (offer: any) =>
               offer.active === true &&
-              offer.merchants?.active === true
+              offer.merchants?.active === true &&
+              offer.merchants?.name?.trim() !== "" &&
+              offer.price !== null &&
+              offer.affiliate_url
           )
           .map((offer: any) => ({
             id: offer.merchant_id,
@@ -101,12 +98,107 @@ export async function POST(req: Request) {
             last_checked_at: offer.last_checked_at,
             created_at: offer.created_at,
             updated_at: offer.updated_at,
-          })),
-      }))
-      .sort(
-        (a: any, b: any) =>
-          b.match_score - a.match_score
-      )
+          }));
+
+        /*
+         * Find the lowest currently available retailer price.
+         */
+        const lowestOfferPrice = merchants.length
+          ? Math.min(
+              ...merchants.map((merchant: any) =>
+                Number(merchant.price)
+              )
+            )
+          : null;
+
+        /*
+         * Use the actual active retailer price when
+         * available; otherwise fall back to products.price.
+         */
+        const effectivePrice =
+          lowestOfferPrice !== null
+            ? lowestOfferPrice
+            : p.price;
+
+        /*
+         * Give the scoring engine the effective price.
+         */
+        const productForScoring = {
+          ...p,
+          price: effectivePrice,
+        };
+
+        return {
+          ...p,
+
+          /*
+           * Personalized product-fit score.
+           */
+          match_score: scoreProduct(
+            productForScoring,
+            answers
+          ),
+
+          /*
+           * Effective price used by the scoring engine.
+           */
+          price: effectivePrice,
+
+          /*
+           * Availability information is kept separate
+           * from the match score.
+           */
+          has_active_offer: merchants.length > 0,
+          active_offer_count: merchants.length,
+
+          /*
+           * Convert product_details relationship into
+           * the description expected by Advisor.tsx.
+           */
+          product_details:
+            p.product_details ??
+            (Array.isArray(p.product_details_relation)
+              ? p.product_details_relation[0]?.description ?? null
+              : p.product_details_relation?.description ?? null),
+
+          /*
+           * Retailer offers shown on the results page.
+           */
+          merchants,
+        };
+      })
+
+      /*
+       * Ranking logic.
+       *
+       * 1. Products that can actually be purchased come first.
+       * 2. Higher personalized match score comes next.
+       * 3. Lower price breaks ties.
+       *
+       * We do NOT artificially increase the match score
+       * because a product has an active offer.
+       */
+      .sort((a: any, b: any) => {
+        if (a.has_active_offer !== b.has_active_offer) {
+          return a.has_active_offer ? -1 : 1;
+        }
+
+        if (b.match_score !== a.match_score) {
+          return b.match_score - a.match_score;
+        }
+
+        return (
+          Number(a.price ?? Infinity) -
+          Number(b.price ?? Infinity)
+        );
+      })
+
+      /*
+       * Keep the current result limit for this test.
+       *
+       * We will change this to 10 after validating
+       * the ranking behaviour.
+       */
       .slice(0, 7);
 
     /*
