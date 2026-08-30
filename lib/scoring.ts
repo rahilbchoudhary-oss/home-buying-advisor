@@ -1,23 +1,29 @@
 import type { Answers } from "./questions";
 
-type Product = {
-  capacity?: number | null;
-  price?: number | null;
-  star_rating?: number | null;
-  iseer?: number | null;
-  noise_db?: number | null;
-  smart?: boolean | null;
-  air_quality?: boolean | null;
+export type ScoringProduct = {
+  capacity: number;
+  star_rating: number;
+  price: number;
+  iseer: number;
+  noise_db: number;
+  smart: boolean;
+  air_quality: boolean;
 };
 
-/**
- * ---------------------------------------------------------
- * TARGET CAPACITY
- * ---------------------------------------------------------
- *
- * Estimates the appropriate AC capacity from room size.
- */
-export function targetCapacity(answers: Answers): number {
+export type MatchReasonType = "positive" | "negative" | "neutral";
+
+export type MatchReason = {
+  type: MatchReasonType;
+  text: string;
+};
+
+export type MatchBreakdown = {
+  rawScore: number;
+  finalScore: number;
+  reasons: MatchReason[];
+};
+
+export function targetCapacity(answers: Answers) {
   if (
     answers.room === "300+ sq ft" ||
     answers.room === "200–300 sq ft"
@@ -35,11 +41,6 @@ export function targetCapacity(answers: Answers): number {
   return 1.2;
 }
 
-/**
- * ---------------------------------------------------------
- * BUDGET
- * ---------------------------------------------------------
- */
 function budgetLimit(answers: Answers): number {
   const budgets: Record<string, number> = {
     "₹30,000": 30000,
@@ -49,449 +50,279 @@ function budgetLimit(answers: Answers): number {
     "₹75,000+": 75000,
   };
 
-  return budgets[answers.budget] ?? 50000;
+  return budgets[answers.budget ?? ""] ?? 50000;
+}
+
+function formatPrice(value: number): string {
+  return `₹${Math.round(value).toLocaleString("en-IN")}`;
 }
 
 /**
- * ---------------------------------------------------------
- * CAPACITY FIT
- * ---------------------------------------------------------
+ * Single source of truth for scoring + explanations.
  *
- * Capacity is one of the strongest signals because an AC
- * that is substantially undersized or oversized is not an
- * ideal recommendation.
+ * Every point awarded here is also represented by a reason.
  */
-function capacityFit(
-  productCapacity: number,
-  target: number
-): number {
-  if (!productCapacity) return 0.25;
+export function getMatchBreakdown(
+  p: ScoringProduct,
+  a: Answers
+): MatchBreakdown {
+  const cap = targetCapacity(a);
+  const budget = budgetLimit(a);
 
-  const difference = Math.abs(productCapacity - target);
+  let score = 50;
 
-  if (difference === 0) return 1.0;
-  if (difference <= 0.3) return 0.90;
-  if (difference <= 0.5) return 0.75;
-  if (difference <= 0.8) return 0.55;
-  if (difference <= 1.0) return 0.35;
+  const positive: MatchReason[] = [];
+  const negative: MatchReason[] = [];
 
-  return 0.15;
-}
+  /* =========================================================
+     1. CAPACITY / ROOM FIT
+     ========================================================= */
 
-/**
- * ---------------------------------------------------------
- * PRICE FIT
- * ---------------------------------------------------------
- *
- * We don't want the cheapest product to automatically win.
- *
- * Products comfortably inside budget score well.
- * Slightly-over-budget products can still remain competitive.
- * Significantly-over-budget products are penalized.
- */
-function priceFit(
-  price: number,
-  budget: number
-): number {
-  if (!price) return 0.5;
+  if (p.capacity === cap) {
+    score += 22;
 
-  if (price <= budget) {
-    const savingRatio = (budget - price) / budget;
+    positive.push({
+      type: "positive",
+      text: `${p.capacity} Ton capacity suits your ${a.room} room size.`,
+    });
+  } else if (Math.abs(p.capacity - cap) === 0.5) {
+    score += 8;
 
-    return Math.min(
-      1,
-      0.88 + savingRatio * 0.20
-    );
+    positive.push({
+      type: "positive",
+      text: `${p.capacity} Ton is reasonably close to the ${cap} Ton capacity target for your room.`,
+    });
+  } else {
+    negative.push({
+      type: "negative",
+      text: `${p.capacity} Ton differs from the ${cap} Ton capacity target for your room.`,
+    });
   }
 
-  const overBudgetRatio =
-    (price - budget) / budget;
+  /* =========================================================
+     2. BUDGET
+     ========================================================= */
 
-  if (overBudgetRatio <= 0.05) return 0.82;
-  if (overBudgetRatio <= 0.10) return 0.70;
-  if (overBudgetRatio <= 0.20) return 0.50;
-  if (overBudgetRatio <= 0.30) return 0.30;
+  if (p.price <= budget) {
+    score += 15;
 
-  return 0.10;
-}
+    positive.push({
+      type: "positive",
+      text: `${formatPrice(p.price)} is within your ${formatPrice(
+        budget
+      )} maximum budget.`,
+    });
+  } else {
+    score -= 25;
 
-/**
- * ---------------------------------------------------------
- * ENERGY EFFICIENCY
- * ---------------------------------------------------------
- */
-function efficiencyFit(
-  iseer: number
-): number {
-  if (!iseer) return 0.5;
-
-  if (iseer >= 5.2) return 1.0;
-  if (iseer >= 5.0) return 0.95;
-  if (iseer >= 4.7) return 0.85;
-  if (iseer >= 4.5) return 0.75;
-  if (iseer >= 4.0) return 0.60;
-  if (iseer >= 3.5) return 0.45;
-
-  return 0.30;
-}
-
-/**
- * ---------------------------------------------------------
- * STAR RATING
- * ---------------------------------------------------------
- */
-function starFit(
-  rating: number,
-  answers: Answers
-): number {
-  if (!rating) return 0.5;
-
-  if (rating === 5) {
-    if (answers.star === "Must have 5 Star") return 1.0;
-    if (answers.star === "Prefer 5 Star") return 0.95;
-
-    return 0.85;
+    negative.push({
+      type: "negative",
+      text: `${formatPrice(p.price)} is above your ${formatPrice(
+        budget
+      )} maximum budget, so budget fit is reduced.`,
+    });
   }
 
-  if (rating >= 4) return 0.70;
-  if (rating >= 3) return 0.45;
-
-  return 0.25;
-}
-
-/**
- * ---------------------------------------------------------
- * NOISE
- * ---------------------------------------------------------
- */
-function noiseFit(
-  noise: number
-): number {
-  if (!noise) return 0.5;
-
-  if (noise <= 28) return 1.0;
-  if (noise <= 30) return 0.95;
-  if (noise <= 32) return 0.85;
-  if (noise <= 34) return 0.65;
-  if (noise <= 36) return 0.45;
-
-  return 0.25;
-}
-
-/**
- * ---------------------------------------------------------
- * PERSONAL PRIORITY FIT
- * ---------------------------------------------------------
- */
-function priorityFit(
-  product: Product,
-  answers: Answers
-): number {
-  switch (answers.priority) {
-    case "Electricity savings":
-      return efficiencyFit(
-        Number(product.iseer ?? 0)
-      );
-
-    case "Quiet operation":
-      return noiseFit(
-        Number(product.noise_db ?? 0)
-      );
-
-    case "Air quality":
-      return product.air_quality ? 1.0 : 0.25;
-
-    case "Smart features":
-      return product.smart ? 1.0 : 0.25;
-
-    case "Fast cooling": {
-      const target = targetCapacity(answers);
-      const capacity = Number(product.capacity ?? 0);
-
-      if (capacity >= target) return 1.0;
-      if (capacity >= target - 0.3) return 0.75;
-
-      return 0.35;
-    }
-
-    default:
-      return 0.60;
-  }
-}
-
-/**
- * ---------------------------------------------------------
- * USAGE FIT
- * ---------------------------------------------------------
- *
- * Heavy daily usage increases the importance of efficiency
- * and 5-star rating.
- */
-function usageFit(
-  product: Product,
-  answers: Answers
-): number {
-  const heavyUsage =
-    answers.hours === "8–12 hours" ||
-    answers.hours === "12+ hours";
-
-  if (!heavyUsage) {
-    return 0.60;
-  }
-
-  const stars = Number(
-    product.star_rating ?? 0
-  );
-
-  const efficiency = Number(
-    product.iseer ?? 0
-  );
-
-  let score = 0.50;
-
-  if (stars === 5) {
-    score += 0.25;
-  }
-
-  if (efficiency >= 5.0) {
-    score += 0.25;
-  } else if (efficiency >= 4.5) {
-    score += 0.15;
-  }
-
-  return Math.min(1, score);
-}
-
-/**
- * ---------------------------------------------------------
- * OCCUPANCY FIT
- * ---------------------------------------------------------
- */
-function occupancyFit(
-  product: Product,
-  answers: Answers
-): number {
-  const capacity = Number(
-    product.capacity ?? 0
-  );
-
-  const target = targetCapacity(answers);
+  /* =========================================================
+     3. STAR RATING
+     ========================================================= */
 
   if (
-    (answers.people === "5+" ||
-      answers.people === "3–4") &&
-    capacity >= target
+    a.star === "Must have 5 Star" &&
+    p.star_rating === 5
   ) {
-    return 1.0;
+    score += 9;
+
+    positive.push({
+      type: "positive",
+      text: "5 Star rating matches your requirement for maximum efficiency.",
+    });
   }
 
-  if (capacity >= target) {
-    return 0.85;
+  if (
+    a.star === "Prefer 5 Star" &&
+    p.star_rating === 5
+  ) {
+    score += 5;
+
+    positive.push({
+      type: "positive",
+      text: "5 Star rating matches your preference for higher efficiency.",
+    });
   }
 
-  return 0.50;
+  if (
+    a.star === "Must have 5 Star" &&
+    p.star_rating !== 5
+  ) {
+    negative.push({
+      type: "negative",
+      text: `${p.star_rating} Star rating does not meet your 5 Star requirement.`,
+    });
+  }
+
+  /* =========================================================
+     4. DAILY USAGE
+     ========================================================= */
+
+  if (
+    a.hours === "8–12 hours" ||
+    a.hours === "12+ hours"
+  ) {
+    if (p.star_rating === 5) {
+      score += 7;
+
+      positive.push({
+        type: "positive",
+        text: "5 Star efficiency is valuable for your long daily AC usage.",
+      });
+    }
+  }
+
+  /* =========================================================
+     5. PRIMARY PRIORITY
+     ========================================================= */
+
+  if (a.priority === "Electricity savings") {
+    if (p.iseer >= 5) {
+      score += 8;
+
+      positive.push({
+        type: "positive",
+        text: `ISEER ${p.iseer} supports your electricity-saving priority.`,
+      });
+    } else {
+      negative.push({
+        type: "negative",
+        text: `ISEER ${p.iseer} is below the 5.0 level used for your electricity-saving priority.`,
+      });
+    }
+  }
+
+  if (a.priority === "Quiet operation") {
+    if (p.noise_db <= 31) {
+      score += 8;
+
+      positive.push({
+        type: "positive",
+        text: `${p.noise_db} dB is a strong fit for your quiet-operation priority.`,
+      });
+    } else {
+      negative.push({
+        type: "negative",
+        text: `${p.noise_db} dB is less suited to your quiet-operation priority.`,
+      });
+    }
+  }
+
+  if (a.priority === "Air quality") {
+    if (p.air_quality) {
+      score += 8;
+
+      positive.push({
+        type: "positive",
+        text: "Air-quality features match your air-quality priority.",
+      });
+    } else {
+      negative.push({
+        type: "negative",
+        text: "This model does not have the air-quality feature used by your priority.",
+      });
+    }
+  }
+
+  if (a.priority === "Smart features") {
+    if (p.smart) {
+      score += 7;
+
+      positive.push({
+        type: "positive",
+        text: "Smart features match your preference for connected controls.",
+      });
+    } else {
+      negative.push({
+        type: "negative",
+        text: "This model does not provide the smart features you prioritised.",
+      });
+    }
+  }
+
+  if (a.priority === "Fast cooling") {
+    if (p.capacity >= cap) {
+      score += 5;
+
+      positive.push({
+        type: "positive",
+        text: `${p.capacity} Ton capacity supports your fast-cooling priority.`,
+      });
+    } else {
+      negative.push({
+        type: "negative",
+        text: `The ${p.capacity} Ton capacity is below your ${cap} Ton target for fast cooling.`,
+      });
+    }
+  }
+
+  /* =========================================================
+     6. OCCUPANCY / COOLING LOAD
+     ========================================================= */
+
+  if (
+    (a.people === "5+" || a.people === "3–4") &&
+    p.capacity >= cap
+  ) {
+    score += 4;
+
+    positive.push({
+      type: "positive",
+      text: `${p.capacity} Ton capacity is appropriate for your higher occupancy level.`,
+    });
+  }
+
+  const rawScore = score;
+
+  const finalScore = Math.max(
+    50,
+    Math.min(98, Math.round(score))
+  );
+
+  /*
+   * Show the most decision-relevant reasons first.
+   *
+   * We don't want a wall of text.
+   */
+  const reasons = [
+    ...positive.slice(0, 5),
+    ...negative.slice(0, 2),
+  ];
+
+  return {
+    rawScore,
+    finalScore,
+    reasons,
+  };
 }
 
 /**
- * ---------------------------------------------------------
- * SCORE PRODUCT
- * ---------------------------------------------------------
+ * Existing public scoring function.
  *
- * The model is intentionally weighted rather than using
- * arbitrary "+points" rules.
- *
- * Core fit:
- *
- * Capacity       30%
- * Budget         20%
- * Priority       20%
- * Efficiency     10%
- * Star rating     8%
- * Usage           6%
- * Occupancy       6%
- *
- * These weights make physical fit and the user's explicit
- * priority more important than secondary features.
+ * IMPORTANT:
+ * It now uses getMatchBreakdown(), so the displayed score and
+ * explanation can never use different scoring rules.
  */
 export function scoreProduct(
-  product: Product,
-  answers: Answers
+  p: ScoringProduct,
+  a: Answers
 ): number {
-  const target = targetCapacity(answers);
-  const budget = budgetLimit(answers);
-
-  const capacity = Number(
-    product.capacity ?? 0
-  );
-
-  const price = Number(
-    product.price ?? 0
-  );
-
-  const stars = Number(
-    product.star_rating ?? 0
-  );
-
-  const iseer = Number(
-    product.iseer ?? 0
-  );
-
-  const noise = Number(
-    product.noise_db ?? 0
-  );
-
-  const capacityScore =
-    capacityFit(capacity, target);
-
-  const budgetScore =
-    priceFit(price, budget);
-
-  const priorityScore =
-    priorityFit(product, answers);
-
-  const efficiencyScore =
-    efficiencyFit(iseer);
-
-  const starScore =
-    starFit(stars, answers);
-
-  const usageScore =
-    usageFit(product, answers);
-
-  const occupancyScore =
-    occupancyFit(product, answers);
-
-  /*
-   * -------------------------------------------------------
-   * WEIGHTED MODEL
-   * -------------------------------------------------------
-   */
-
-  let score =
-    capacityScore * 30 +
-    budgetScore * 20 +
-    priorityScore * 20 +
-    efficiencyScore * 10 +
-    starScore * 8 +
-    usageScore * 6 +
-    occupancyScore * 6;
-
-  /*
-   * -------------------------------------------------------
-   * EXPLICIT REQUIREMENT PENALTIES
-   * -------------------------------------------------------
-   *
-   * These are deliberately limited.
-   * We don't want one imperfect attribute to destroy an
-   * otherwise good recommendation.
-   */
-
-  // User explicitly requires 5-star.
-  if (
-    answers.star === "Must have 5 Star" &&
-    stars < 5
-  ) {
-    score -= 12;
-  }
-
-  // Very large capacity mismatch.
-  if (
-    capacity > 0 &&
-    Math.abs(capacity - target) >= 1
-  ) {
-    score -= 8;
-  }
-
-  // Significantly outside budget.
-  if (
-    price > budget * 1.30
-  ) {
-    score -= 8;
-  }
-
-  /*
-   * -------------------------------------------------------
-   * PERSONAL PRIORITY BONUS
-   * -------------------------------------------------------
-   *
-   * Give a small additional boost to products that are
-   * particularly strong in the user's selected priority.
-   */
-  if (answers.priority === "Electricity savings") {
-    if (iseer >= 5.2) score += 3;
-  }
-
-  if (answers.priority === "Quiet operation") {
-    if (noise > 0 && noise <= 28) score += 3;
-  }
-
-  if (answers.priority === "Air quality") {
-    if (product.air_quality) score += 3;
-  }
-
-  if (answers.priority === "Smart features") {
-    if (product.smart) score += 3;
-  }
-
-  if (answers.priority === "Fast cooling") {
-    if (capacity >= target) score += 3;
-  }
-
-  /*
-   * -------------------------------------------------------
-   * CALIBRATION
-   * -------------------------------------------------------
-   *
-   * We don't expose the raw weighted score directly.
-   *
-   * A small compression toward the middle prevents the UI
-   * from showing misleadingly extreme scores.
-   *
-   * Example:
-   *
-   * Raw 90 → ~88
-   * Raw 75 → ~75
-   * Raw 55 → ~58
-   * Raw 35 → ~42
-   */
-  const calibrated =
-    50 + (score - 50) * 0.90;
-
-  return Math.max(
-    20,
-    Math.min(
-      98,
-      Math.round(calibrated)
-    )
-  );
+  return getMatchBreakdown(p, a).finalScore;
 }
 
 /**
- * ---------------------------------------------------------
- * MATCH LABEL
- * ---------------------------------------------------------
- *
- * Use this wherever the recommendation UI needs a
- * human-readable interpretation of the score.
+ * Convenience function for the UI.
  */
-export function matchLabel(
-  score: number
-): string {
-  if (score >= 85) {
-    return "Excellent Match";
-  }
-
-  if (score >= 75) {
-    return "Very Good Match";
-  }
-
-  if (score >= 65) {
-    return "Good Match";
-  }
-
-  if (score >= 50) {
-    return "Fair Match";
-  }
-
-  return "Weak Match";
+export function explainMatch(
+  p: ScoringProduct,
+  a: Answers
+): MatchReason[] {
+  return getMatchBreakdown(p, a).reasons;
 }
