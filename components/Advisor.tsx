@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { questions, type Answers } from "@/lib/questions";
+import { matchLabel } from "@/lib/scoring";
 
 type Merchant = {
   id: string;
@@ -225,14 +226,14 @@ function Results({
   }
 
   /*
-   * IMPORTANT DATA-SCIENCE PRINCIPLE
+   * DATA-SCIENCE PRINCIPLE
    *
    * Match score = product fit.
    *
    * Availability is treated separately.
    *
-   * We do NOT increase or decrease the score because
-   * an affiliate offer exists.
+   * An affiliate offer does not increase the product's
+   * match score.
    */
 
   const availableProducts = products.filter((product) =>
@@ -244,13 +245,12 @@ function Results({
   );
 
   /*
-   * The API is responsible for ranking products by
-   * recommendation score.
+   * The API is responsible for ranking.
    *
-   * Among products returned by the API, we preserve that
-   * ranking while separating commercially available
-   * products from unavailable products.
+   * We preserve the API ranking while separating
+   * commercially available products from unavailable ones.
    */
+
   const top = availableProducts[0] ?? products[0];
 
   return (
@@ -297,7 +297,7 @@ function Results({
           </span>
 
           <span>
-            ₹{top.price.toLocaleString("en-IN")}
+            ₹{Number(top.price).toLocaleString("en-IN")}
           </span>
 
         </div>
@@ -450,6 +450,19 @@ function ProductCard({
   rank: number;
   available: boolean;
 }) {
+  /*
+   * Calibrated match label.
+   *
+   * Examples:
+   *
+   * 85+  = Excellent Match
+   * 75+  = Very Good Match
+   * 65+  = Good Match
+   * 50+  = Fair Match
+   * <50  = Weak Match
+   */
+  const calibratedLabel = matchLabel(p.match_score);
+
   return (
     <article
       className="product"
@@ -500,10 +513,13 @@ function ProductCard({
               ) : rank === 1 ? (
                 "🥈 ALTERNATIVE"
               ) : (
-                "⭐ STRONG MATCH"
+                `⭐ ${calibratedLabel.toUpperCase()}`
               )
             ) : (
-              "🔎 HIGH-FIT — CURRENTLY UNAVAILABLE"
+              <>
+                🔎 {calibratedLabel.toUpperCase()}{" "}
+                — CURRENTLY UNAVAILABLE
+              </>
             )}
 
           </div>
