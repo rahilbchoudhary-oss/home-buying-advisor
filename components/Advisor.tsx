@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { questions, type Answers } from "@/lib/questions";
+import { explainMatch, type MatchReason } from "@/lib/scoring";
 import { matchLabel } from "@/lib/scoring";
 
 type Merchant = {
@@ -573,7 +574,12 @@ function ProductCard({
           </span>
 
         </div>
-
+        
+        <WhyThisMatch
+  product={p}
+  answers={answers}
+/>
+        
         {/* DESCRIPTION */}
 
         {p.product_details && (
@@ -591,6 +597,80 @@ function ProductCard({
     </article>
   );
 }
+
+/* =========================================================
+   WHY THIS MATCH
+
+   Generates the explanation directly from the scoring engine.
+
+   IMPORTANT:
+   We do NOT manually write product-specific reasons here.
+
+   explainMatch() uses the same scoring logic that produced
+   the match score.
+   ========================================================= */
+
+function WhyThisMatch({
+  product,
+  answers,
+}: {
+  product: Product;
+  answers: Answers;
+}) {
+  const reasons = explainMatch(product, answers);
+
+  if (!reasons.length) {
+    return null;
+  }
+
+  return (
+    <div className="whyMatch">
+
+      <div className="whyMatchHeader">
+
+        <span className="whyMatchIcon">
+          ✓
+        </span>
+
+        <div>
+          <h4>
+            Why this match?
+          </h4>
+
+          <p>
+            Based on your answers and this product's specifications.
+          </p>
+        </div>
+
+      </div>
+
+      <ul className="whyMatchList">
+
+        {reasons.map((reason, index) => (
+
+          <li
+            key={`${reason.text}-${index}`}
+            className={`whyMatchItem ${reason.type}`}
+          >
+
+            <span className="whyMatchBullet">
+              {reason.type === "negative" ? "!" : "✓"}
+            </span>
+
+            <span>
+              {reason.text}
+            </span>
+
+          </li>
+
+        ))}
+
+      </ul>
+
+    </div>
+  );
+}
+
 
 /* =========================================================
    PRODUCT DESCRIPTION
