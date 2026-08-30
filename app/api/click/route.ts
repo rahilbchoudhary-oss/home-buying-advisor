@@ -4,12 +4,26 @@ import { supabaseAdmin } from "@/lib/supabase";
 export async function GET(req: Request) {
   const url = new URL(req.url);
 
-  const productId = url.searchParams.get("product");
-  const merchantId = url.searchParams.get("merchant");
+  // Support both parameter naming styles:
+  // /api/click?product=...&merchant=...
+  // /api/click?product_id=...&merchant_id=...
+  const productId =
+    url.searchParams.get("product") ||
+    url.searchParams.get("product_id");
+
+  const merchantId =
+    url.searchParams.get("merchant") ||
+    url.searchParams.get("merchant_id");
 
   if (!productId || !merchantId) {
     return NextResponse.json(
-      { error: "Missing product or merchant" },
+      {
+        error: "Missing product or merchant",
+        required: {
+          product: "product UUID",
+          merchant: "merchant UUID",
+        },
+      },
       { status: 400 }
     );
   }
@@ -17,23 +31,33 @@ export async function GET(req: Request) {
   try {
     const supabase = supabaseAdmin();
 
-    // Find the exact offer for this product + merchant
+    // --------------------------------------------------
+    // 1. Find the exact active offer
+    // --------------------------------------------------
+
     const { data: offer, error: offerError } = await supabase
       .from("product_offers")
-      .select("id, product_id, merchant_id, affiliate_url, active")
+      .select(
+        "id, product_id, merchant_id, affiliate_url, active"
+      )
       .eq("product_id", productId)
       .eq("merchant_id", merchantId)
       .eq("active", true)
       .single();
 
     if (offerError || !offer || !offer.affiliate_url) {
+      console.error("Offer lookup error:", offerError);
+
       return NextResponse.json(
         { error: "Offer unavailable" },
         { status: 404 }
       );
     }
 
-    // Get merchant name separately
+    // --------------------------------------------------
+    // 2. Find the active merchant
+    // --------------------------------------------------
+
     const { data: merchant, error: merchantError } = await supabase
       .from("merchants")
       .select("id, name")
@@ -42,13 +66,18 @@ export async function GET(req: Request) {
       .single();
 
     if (merchantError || !merchant) {
+      console.error("Merchant lookup error:", merchantError);
+
       return NextResponse.json(
         { error: "Merchant unavailable" },
         { status: 404 }
       );
     }
 
-    // Record affiliate click
+    // --------------------------------------------------
+    // 3. Record affiliate click
+    // --------------------------------------------------
+
     const { error: clickError } = await supabase
       .from("affiliate_clicks")
       .insert({
@@ -59,11 +88,17 @@ export async function GET(req: Request) {
       });
 
     if (clickError) {
-      console.error("Affiliate click tracking error:", clickError);
-      // Do not block the user's purchase because tracking failed.
+      // Tracking failure should NOT stop the purchase redirect.
+      console.error(
+        "Affiliate click tracking error:",
+        clickError
+      );
     }
 
-    // Redirect to the product-specific affiliate URL
+    // --------------------------------------------------
+    // 4. Redirect to the exact affiliate URL
+    // --------------------------------------------------
+
     return NextResponse.redirect(
       offer.affiliate_url,
       302
