@@ -622,7 +622,9 @@ function Retailers({
 
               <a
                 className="button primary small"
-                href={`/api/click?merchant_id=${encodeURIComponent(
+                href={`/api/click?product=${encodeURIComponent(
+                  product.id
+                )}&merchant=${encodeURIComponent(
                   merchant.id
                 )}`}
                 target="_blank"
