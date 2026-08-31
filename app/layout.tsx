@@ -13,6 +13,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <meta
+          name="cuelinks-verification"
+          content="VERIFY-CL-W0JB8HSP"
+        />
+      </head>
+
       <body>
         <header className="nav">
           <div className="container navin">
