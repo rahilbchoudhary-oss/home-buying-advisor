@@ -50,7 +50,7 @@ export async function POST(req: Request) {
           )
         )
       `)
-      .eq("category", "ac")
+      .eq("category", "Split AC")
       .eq("active", true);
 
     if (error) {
